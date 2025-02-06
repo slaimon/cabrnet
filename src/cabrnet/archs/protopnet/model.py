@@ -13,7 +13,7 @@ from torchvision.transforms import ToTensor
 from tqdm import tqdm
 import time
 
-from cabrnet.archs.generic.decision import CaBRNetClassifier
+from cabrnet.archs.protopnet.decision import ProtoPNetClassifier
 from cabrnet.archs.generic.model import CaBRNet
 from cabrnet.core.utils.optimizers import OptimizerManager
 from cabrnet.core.visualization.explainer import ExplanationGraph
@@ -30,7 +30,7 @@ class ProtoPNet(CaBRNet):
         projection_config: Parameters of the projection function used during training.
     """
 
-    def __init__(self, extractor: nn.Module, classifier: CaBRNetClassifier, **kwargs):
+    def __init__(self, extractor: nn.Module, classifier: ProtoPNetClassifier, **kwargs):
         r"""Builds a ProtoPNet.
 
         Args:
