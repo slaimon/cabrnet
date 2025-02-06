@@ -45,7 +45,7 @@ class ProtoPNetClassifier(CaBRNetClassifier):
             num_proto_per_class (int): Number of prototypes per class.
             proto_init_mode (str, optional): Init mode for prototypes. Default: Shifted normal distribution.
             incorrect_class_penalty (float, optional): Initial penalty for incorrect classes in the linear layer.
-                Default: 0.5.
+                Default: -0.5.
             compatibility_mode (bool, optional): If True, enables compatibility mode with legacy ProtoPNet.
                 Default: False.
         """
