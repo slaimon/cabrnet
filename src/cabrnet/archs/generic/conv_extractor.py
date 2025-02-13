@@ -60,45 +60,56 @@ class ConvExtractor(nn.Module):
         backbone_config = config["backbone"]
         check_mandatory_fields(
             config_dict=backbone_config,
-            mandatory_fields=["arch", "weights"],
+            mandatory_fields=["arch"],
             location="backbone configuration",
         )
 
         arch = backbone_config["arch"]
         arch_params = backbone_config.get("params", {})
-        weights = backbone_config["weights"]
+        weights = backbone_config.get("weights")
 
         # Check that model architecture is supported
-        assert arch.lower() in torch_models.list_models(), f"Unsupported model architecture: {arch}"
+        if backbone_config.get("module") in ["torchvision", None]:
+            assert arch.lower() in torch_models.list_models(), f"Unsupported model architecture: {arch}"
 
-        if weights == "None":
-            weights = ""
+            if weights == "None":
+                weights = ""
 
-        if os.path.isfile(weights):
-            if not ignore_weight_errors:
-                logger.info(f"Loading state dict for feature extractor: {weights}")
-            loaded_weights = torch.load(weights, map_location="cpu")
-            model = torch_models.get_model(arch, **arch_params)
-            if isinstance(loaded_weights, dict):
-                model.load_state_dict(loaded_weights)
-            elif isinstance(loaded_weights, nn.Module):
-                model.load_state_dict(loaded_weights.state_dict(), strict=False)
+            if os.path.isfile(weights):
+                if not ignore_weight_errors:
+                    logger.info(f"Loading state dict for feature extractor: {weights}")
+                loaded_weights = torch.load(weights, map_location="cpu")
+                model = torch_models.get_model(arch, **arch_params)
+                if isinstance(loaded_weights, dict):
+                    model.load_state_dict(loaded_weights)
+                elif isinstance(loaded_weights, nn.Module):
+                    model.load_state_dict(loaded_weights.state_dict(), strict=False)
+                else:
+                    raise ValueError(f"Unsupported weights type: {type(loaded_weights)}")
+            elif weights and hasattr(torch_models.get_model_weights(arch), weights):
+                if not ignore_weight_errors:
+                    logger.info(f"Loading pytorch weights: {weights}")
+                loaded_weights = getattr(torch_models.get_model_weights(arch), weights)
+                model = torch_models.get_model(arch, weights=loaded_weights, **arch_params)
+            elif not weights or ignore_weight_errors:
+                logger.warning(
+                    "Could not load initial weights for the feature extractor. "
+                    "This might be OK if the model state dictionary is loaded afterwards, "
+                    "or the model is in ONNX format and all parameters are provided in the ONNX file."
+                )
+                model = torch_models.get_model(arch, **arch_params)
             else:
-                raise ValueError(f"Unsupported weights type: {type(loaded_weights)}")
-        elif weights and hasattr(torch_models.get_model_weights(arch), weights):
-            if not ignore_weight_errors:
-                logger.info(f"Loading pytorch weights: {weights}")
-            loaded_weights = getattr(torch_models.get_model_weights(arch), weights)
-            model = torch_models.get_model(arch, weights=loaded_weights, **arch_params)
-        elif not weights or ignore_weight_errors:
-            logger.warning(
-                "Could not load initial weights for the feature extractor. "
-                "This might be OK if the model state dictionary is loaded afterwards, "
-                "or the model is in ONNX format and all parameters are provided in the ONNX file."
-            )
-            model = torch_models.get_model(arch, **arch_params)
+                raise ValueError(f"Cannot load weights {weights} for model of type {arch}. Possible typo or missing file.")
+        elif backbone_config.get("module") == "torch.hub":
+            if "repo_or_dir" not in backbone_config:
+                raise ValueError(f"Missing mandatory key repo_or_dir in backbone configuration")
+            if "pretrained" in backbone_config:
+                kwargs = {"pretrained": backbone_config["pretrained"]}
+            else:
+                kwargs = {}
+            model = torch.hub.load(repo_or_dir=backbone_config["repo_or_dir"], model=arch, **kwargs)
         else:
-            raise ValueError(f"Cannot load weights {weights} for model of type {arch}. Possible typo or missing file.")
+            raise ValueError(f"Unsupported module for backbone: {backbone_config.get('module')}")
 
         if seed is not None:
             # Reset random generator (compatibility tests only)
