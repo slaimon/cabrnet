@@ -1,0 +1,23 @@
+train_set:
+  module: cabrnet.core.utils.dicom
+  name: load_dicom_dataset
+  params:
+    path: "C:\\Users\\silab-t1\\Desktop\\Tirocinio\\Dataset\\dicom\\train"
+  batch_size: 2
+  shuffle: true
+
+projection_set:
+  module: cabrnet.core.utils.dicom
+  name: load_dicom_dataset
+  params:
+    path: "C:\\Users\\silab-t1\\Desktop\\Tirocinio\\Dataset\\dicom\\proj"
+  batch_size: 16
+  shuffle: false
+
+test_set:
+  module: cabrnet.core.utils.dicom
+  name: load_dicom_dataset
+  params:
+    path: "C:\\Users\\silab-t1\\Desktop\\Tirocinio\\Dataset\\dicom\\test"
+  batch_size: 16
+  shuffle: false
