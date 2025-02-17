@@ -3,6 +3,8 @@ import math
 import pydicom
 import torch
 import torch.nn.functional as f
+import numpy as np
+import time
 
 from torch.utils.data import TensorDataset
 
@@ -42,10 +44,18 @@ def load_dicom_dataset(path: str):
             if ext == ".dcm":
                 # open the DICOM file and convert it to tensor
                 print("loading file " + path + label + '/' + entry.name)
+                load_start = time.time()
                 dcm_img = pydicom.dcmread(entry.path)
+                numpy_start = time.time()
                 npy_img = dcm_img.pixel_array
-                data.append(torch.from_numpy(npy_img))
+                tensor_start = time.time()
+                tensor_img = torch.from_numpy(npy_img)
+                end = time.time()
+                data.append(tensor_img)
                 labels.append(torch.tensor(i))
+                print(f"loaded in {numpy_start-load_start}s")
+                print(f"converted to np in {tensor_start-numpy_start}s")
+                print(f"converted to torch in {end-tensor_start}s")
 
     # get shape of each sample tensor
     shapes = [x.shape for x in data]
