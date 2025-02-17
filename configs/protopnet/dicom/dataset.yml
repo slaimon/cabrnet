@@ -11,7 +11,7 @@ projection_set:
   name: load_dicom_dataset
   params:
     path: "C:\\Users\\silab-t1\\Desktop\\Tirocinio\\Dataset\\dicom\\proj"
-  batch_size: 16
+  batch_size: 2
   shuffle: false
 
 test_set:
@@ -19,5 +19,5 @@ test_set:
   name: load_dicom_dataset
   params:
     path: "C:\\Users\\silab-t1\\Desktop\\Tirocinio\\Dataset\\dicom\\test"
-  batch_size: 16
+  batch_size: 2
   shuffle: false

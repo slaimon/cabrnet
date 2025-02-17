@@ -64,7 +64,7 @@ def load_dicom_dataset(path: str):
         padding = [padding[2][0], padding[2][1], padding[1][0], padding[1][1], padding[0][0], padding[0][1]]
 
         # apply padding
-        padded_x = f.pad(x, padding)
+        padded_x = f.pad(x, padding).unsqueeze(0).expand(3,-1,-1,-1)
         print(f"converted sample #{i+1} from {x.shape} to {padded_x.shape}")
         data[i] = padded_x
 
