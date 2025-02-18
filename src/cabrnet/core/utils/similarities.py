@@ -279,6 +279,32 @@ class ProtoPNetSimilarity(SquaredEuclideanDistance, LogDistance):
         """
         super().__init__(stability_factor=stability_factor, **kwargs)
 
+class SquaredEuclideanDistance3D(SimilarityLayer):
+    r"""Layer for computing Euclidean (L2) distances in the convolutional space."""
+
+    def distances(self, features: Tensor, prototypes: Tensor, **kwargs) -> Tensor:
+        r"""Computes pairwise squared Euclidean (L2) distances between a tensor of features and a tensor of prototypes.
+
+        Args:
+            features (tensor): Input tensor. Shape (N, D, T, H, W).
+            prototypes (tensor): Tensor of prototypes. Shape (P, D, 1, 1, 1).
+
+        Returns:
+            Tensor of distances. Shape (N, P, T, H, W).
+        """
+        N, D, T, H, W = features.shape
+        features = features.view((N, D, -1))  # Shape (N, D, TxHxW)
+        features = torch.transpose(features, 1, 2)  # Shape (N, TxHxW, D)
+        prototypes = prototypes.squeeze(dim=(2, 3, 4))  # Shape (P, D)
+        distances = torch.cdist(features, prototypes) ** 2  # Shape (N, TxHxW, P)
+        distances = torch.transpose(distances, 1, 2)  # Shape (N, P, TxHxW)
+        distances = distances.view(distances.shape[:2] + (T, H, W))  # Shape (N, P, T, H, W)
+        return distances
+
+class ProtoPNet3DSimilarity(SquaredEuclideanDistance3D, LogDistance):
+    def __init__(self, stability_factor: float = 1e-4, **kwargs) -> None:
+        super().__init__(stability_factor=stability_factor, **kwargs)
+
 
 class LegacyProtoTreeSimilarity(ProtoTreeDistance, ExpDistance):
     r"""Layer for computing similarity scores based on Euclidean (L2) distances in the convolutional space

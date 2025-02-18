@@ -11,7 +11,7 @@ extractor:
     pretrained: True
 
 similarity:
-  name: ProtoPNetSimilarity
+  name: ProtoPNet3DSimilarity
 
 classifier:
   module: cabrnet.archs.protopnet3d.decision
