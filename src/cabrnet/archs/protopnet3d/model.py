@@ -628,6 +628,8 @@ class ProtoPNet3D(CaBRNet):
             }
             for proto_idx in range(num_prototypes)
         }
+        return projection_info
+
         projection_vectors = torch.zeros_like(self.classifier.prototypes)
 
         with torch.no_grad():
