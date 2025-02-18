@@ -39,7 +39,7 @@ auxiliary_info:
     separability: -0.08
     regularization: 0.0001
   projection_config:
-    start_epoch: 0
+    start_epoch: 10
     frequency: 1
     num_ft_epochs: 1
 
