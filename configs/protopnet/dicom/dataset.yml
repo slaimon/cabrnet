@@ -1,6 +1,6 @@
 train_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_zeros
+  name: load_rand
   params:
     in_shape: [16,256,256]
     size: 10
@@ -9,7 +9,7 @@ train_set:
 
 projection_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_zeros
+  name: load_rand
   params:
     in_shape: [16,256,256]
     size: 10
@@ -18,7 +18,7 @@ projection_set:
 
 test_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_zeros
+  name: load_rand
   params:
     in_shape: [16,256,256]
     size: 10
