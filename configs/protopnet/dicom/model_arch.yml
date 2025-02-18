@@ -9,16 +9,6 @@ extractor:
     layer: blocks.5.dropout
     repo_or_dir: facebookresearch/pytorchvideo
     pretrained: True
-  add_on:
-    init_mode: XAVIER
-    conv1:
-      type: Conv2d
-      params:
-        out_channels: 128
-        kernel_size: 1
-        bias: False
-    sigmoid1:
-      type: Sigmoid
 
 similarity:
   name: ProtoPNetSimilarity

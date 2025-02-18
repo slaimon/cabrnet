@@ -1,23 +1,26 @@
 train_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_numpy_dataset
+  name: load_zeros
   params:
-    path: data/dbt/train
+    in_shape: [16,256,256]
+    size: 10
   batch_size: 2
   shuffle: true
 
 projection_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_numpy_dataset
+  name: load_zeros
   params:
-    path: data/dbt/train
+    in_shape: [16,256,256]
+    size: 10
   batch_size: 2
   shuffle: false
 
 test_set:
   module: cabrnet.core.utils.load_numpy
-  name: load_numpy_dataset
+  name: load_zeros
   params:
-    path: data/dbt/test
+    in_shape: [16,256,256]
+    size: 10
   batch_size: 2
   shuffle: false
