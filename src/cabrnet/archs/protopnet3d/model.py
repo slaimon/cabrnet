@@ -125,13 +125,13 @@ class ProtoPNet3D(CaBRNet):
                 )
                 # self.num_prototypes is automatically updated after changing the prototype tensor
                 self.classifier.prototypes = nn.Parameter(  # type: ignore
-                    torch.zeros((updated_num_prototypes, self.classifier.num_features, 1, 1)), requires_grad=True
+                    torch.zeros((updated_num_prototypes, self.classifier.num_features, 1, 1, 1)), requires_grad=True
                 )
                 # Update shape of all other relevant tensors
                 self.classifier.proto_class_map = torch.zeros(self.num_prototypes, self.classifier.num_classes)
                 if hasattr(self.classifier.similarity_layer, "_summation_kernel"):
                     self.classifier.similarity_layer.register_buffer(
-                        "_summation_kernel", torch.ones((self.num_prototypes, self.classifier.num_features, 1, 1))
+                        "_summation_kernel", torch.ones((self.num_prototypes, self.classifier.num_features, 1, 1, 1))
                     )
                 pruned_last_layer = nn.Linear(
                     in_features=self.num_prototypes, out_features=self.classifier.num_classes, bias=False
@@ -320,6 +320,9 @@ class ProtoPNet3D(CaBRNet):
         Returns:
             Dictionary containing learning statistics.
         """
+
+        logger.info(f"using device {device}")
+
         # Train for exactly one epoch using the OptimizerManager
         train_info = self._train_epoch(
             dataloaders=dataloaders,
@@ -622,13 +625,13 @@ class ProtoPNet3D(CaBRNet):
         projection_info = {
             proto_idx: {
                 "img_idx": -1,
+                "t": -1,
                 "h": -1,
                 "w": -1,
                 "dist": float("inf"),
             }
             for proto_idx in range(num_prototypes)
         }
-        return projection_info
 
         projection_vectors = torch.zeros_like(self.classifier.prototypes)
 
@@ -636,11 +639,11 @@ class ProtoPNet3D(CaBRNet):
             for batch_idx, (xs, ys) in data_iter:
                 # Map to device and perform inference
                 xs = xs.to(device)
-                feats = self.extractor(xs)  # Shape N x D x H x W
-                _, W = feats.shape[2], feats.shape[3]
+                feats = self.extractor(xs)  # Shape N x D x T x H x W
+                H,W = feats.shape[3], feats.shape[4]
                 distances = self.classifier.similarity_layer.distances(
                     feats, self.classifier.prototypes
-                )  # Shape (N, P, H, W)
+                )  # Shape (N, P, T, H, W)
                 min_dist, min_dist_idxs = torch.min(distances.view(distances.shape[:2] + (-1,)), dim=2)
 
                 for img_idx, (_, y) in enumerate(zip(xs, ys)):
@@ -650,18 +653,20 @@ class ProtoPNet3D(CaBRNet):
                     for proto_idx in class_mapping[y.item()]:
                         # For each entry, only check prototypes that lead to the corresponding class
                         if min_dist[img_idx, proto_idx] < projection_info[proto_idx]["dist"]:
-                            h, w = (
-                                min_dist_idxs[img_idx, proto_idx].item() // W,
+                            t, h, w = (
+                                min_dist_idxs[img_idx, proto_idx].item() // (H*W),
+                                (min_dist_idxs[img_idx, proto_idx].item() % (H*W)) // W,
                                 min_dist_idxs[img_idx, proto_idx].item() % W,
                             )
                             batch_size = 1 if dataloader.batch_size is None else dataloader.batch_size
                             projection_info[proto_idx] = {
                                 "img_idx": batch_idx * batch_size + img_idx,
+                                "t": t,
                                 "h": h,
                                 "w": w,
                                 "dist": min_dist[img_idx, proto_idx].item(),
                             }
-                            projection_vectors[proto_idx] = feats[img_idx, :, h, w].view(proto_dim, 1, 1).cpu()
+                            projection_vectors[proto_idx] = feats[img_idx, :, t, h, w].view(proto_dim, 1, 1, 1).cpu()
 
             # Update prototype vectors
             self.classifier.prototypes.copy_(projection_vectors)
