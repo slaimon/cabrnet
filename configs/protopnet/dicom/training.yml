@@ -1,6 +1,5 @@
 param_groups:
   backbone: extractor.convnet
-  add_on_layers: extractor.add_on
   prototypes: classifier.prototypes
   last_layer: classifier.last_layer
 
@@ -9,16 +8,12 @@ optimizers:
     type: Adam
     groups:
       backbone:
-        lr: 0.001
-        weight_decay_rate: 0.0
-        momentum: 0.9
-      add_on_layers:
-        lr: 0.001
-        weight_decay_rate: 0.0
+        lr: 0.0001
+        weight_decay_rate: 0.01
         momentum: 0.9
       prototypes:
-        lr: 0.001
-        weight_decay_rate: 0.0
+        lr: 0.0001
+        weight_decay_rate: 0.01
         momentum: 0.9
   last_layer_optimizer:
     type: Adam
@@ -26,7 +21,7 @@ optimizers:
       last_layer:
         lr: 0.0001
 
-num_epochs: 12
+num_epochs: 25
 
 periods:
   main_training:
@@ -40,7 +35,7 @@ auxiliary_info:
     separability: -0.08
     regularization: 0.0001
   projection_config:
-    start_epoch: 5
+    start_epoch: 26
     frequency: 5
     num_ft_epochs: 1
 
