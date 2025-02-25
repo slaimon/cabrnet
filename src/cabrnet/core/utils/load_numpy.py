@@ -46,3 +46,37 @@ def load_numpy_dataset(path: str):
     print(f"data: {data.shape}\nlabels: {labels.shape}")
 
     return TensorDataset(data, labels)
+
+
+import os
+
+def load_dataset(path:str):
+    path = path + '/' if path[-1]!='/' else path
+
+    classes = []
+    for entry in os.scandir(path):
+        if entry.is_dir():
+            classes.append(entry.name)
+
+    # load the dataset from disk
+    data = []
+    labels = []
+    for i,label in enumerate(classes):
+        print(f"loading {label} samples...")
+        for entry in os.scandir(path + label):
+            _, ext = os.path.splitext(entry.name)
+            if ext == ".npy":
+                npy_img = np.load(entry.path)
+                data.append(npy_img)
+                labels.append(i)
+
+    print(f"converting to torch tensors...")
+    data = np.array(data)
+    # add redundant channels
+    data = torch.from_numpy(data).unsqueeze(1).expand(-1,3,-1,-1,-1)
+    # transpose the shortest data dimension to dim=2
+    data = torch.transpose(data, 2, 4).type(torch.FloatTensor)
+    labels = torch.from_numpy(np.array(labels)).type(torch.LongTensor)
+    print(f"shape of data: {data.shape}")
+
+    return TensorDataset(data, labels)
