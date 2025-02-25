@@ -717,8 +717,8 @@ class ProtoPNet3D(CaBRNet):
             preprocess = ToTensor()
 
         img_tensor = preprocess(img)
-        if img_tensor.dim() != 4:
-            # Fix number of dimensions if necessary
+        if img_tensor.dim() != 5:
+            # Fix number of dimensions if necessary (1,C,T,H,W)
             img_tensor = torch.unsqueeze(img_tensor, dim=0)
 
         # Map to device
