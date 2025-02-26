@@ -296,6 +296,19 @@ class ProtoPNet3D(CaBRNet):
                 "time/data": total_data_time / batch_num,
             }
         )
+
+        # add validation set statistics
+        if "validation_set" in dataloaders.keys():
+            # move all other stats to subfolder
+            for stat in train_info.keys():
+                train_info[stat+"/train"] = train_info[stat]
+                del train_info[stat]
+
+            # evaluate model on validation set and log stats
+            eval_info = self.evaluate(dataloader=dataloaders["validation_set"], device=device, verbose=verbose)
+            train_info["loss/val"] = eval_info["avg_loss"]
+            train_info["accuracy/val"] = eval_info["avg_accuracy"]
+
         return train_info
 
     def train_epoch(
