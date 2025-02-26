@@ -303,8 +303,8 @@ class ProtoPNet3D(CaBRNet):
         if "validation_set" in dataloaders.keys():
             # evaluate model on validation set and log stats
             eval_info = self.evaluate(dataloader=dataloaders["validation_set"], device=device, verbose=verbose)
-            train_info["loss/val"] = eval_info["avg_loss"]
-            train_info["accuracy/val"] = eval_info["avg_accuracy"]
+            for key in eval_info.keys():
+                train_info[key+"/val"] = eval_info[key]
 
         return train_info
 
