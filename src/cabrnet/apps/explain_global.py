@@ -7,7 +7,7 @@ from cabrnet.archs.generic.model import CaBRNet
 from cabrnet.core.utils.data import DatasetManager
 from cabrnet.core.utils.exceptions import ArgumentError
 from cabrnet.core.utils.save import load_projection_info, safe_copy
-from cabrnet.core.visualization.visualizer import SimilarityVisualizer
+from cabrnet.core.visualization.visualizer3d import SimilarityVisualizer3D
 
 description = "explains the global behaviour of a CaBRNet model"
 
@@ -26,7 +26,7 @@ def create_parser(parser: ArgumentParser | None = None) -> ArgumentParser:
         parser = ArgumentParser(description)
     parser = CaBRNet.create_parser(parser)
     parser = DatasetManager.create_parser(parser)
-    parser = SimilarityVisualizer.create_parser(parser, mandatory_config=True)
+    parser = SimilarityVisualizer3D.create_parser(parser, mandatory_config=True)
     parser.add_argument(
         "-p",
         "--projection-info",
@@ -111,7 +111,7 @@ def execute(args: Namespace) -> None:
     model: CaBRNet = CaBRNet.build_from_config(config=args.model_arch, state_dict_path=args.model_state_dict)
 
     # Init visualizer
-    visualizer = SimilarityVisualizer.build_from_config(config=args.visualization, model=model)
+    visualizer = SimilarityVisualizer3D.build_from_config(config=args.visualization, model=model)
 
     # Build prototypes
     dataloaders = DatasetManager.get_dataloaders(config=args.dataset)
@@ -129,7 +129,7 @@ def execute(args: Namespace) -> None:
     # Save visualization config
     safe_copy(
         args.visualization,
-        os.path.join(args.output_dir, "prototypes", SimilarityVisualizer.DEFAULT_VISUALIZATION_CONFIG),
+        os.path.join(args.output_dir, "prototypes", SimilarityVisualizer3D.DEFAULT_VISUALIZATION_CONFIG),
     )
 
     # Generate explanation
