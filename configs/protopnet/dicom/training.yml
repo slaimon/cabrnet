@@ -8,11 +8,11 @@ optimizers:
     type: Adam
     groups:
       backbone:
-        lr: 0.000001
+        lr: 0.00001
         weight_decay_rate: 0.01
         momentum: 0.9
       prototypes:
-        lr: 0.000001
+        lr: 0.00001
         weight_decay_rate: 0.01
         momentum: 0.9
   last_layer_optimizer:
@@ -24,9 +24,12 @@ optimizers:
 num_epochs: 100
 
 periods:
+  warmup:
+    num_epochs: 15
+    freeze: [ backbone ]
+    optimizers: warmup_optimizer
   main_training:
     patience: 30
-    epoch_range: [0, 100]
     optimizers: joint_optimizer
 
 auxiliary_info:
