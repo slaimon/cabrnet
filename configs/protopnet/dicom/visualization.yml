@@ -1,0 +1,10 @@
+attribution:
+  type: cubic_upsampling3D
+  params:
+    normalize: True
+    location: max
+view:
+  type: bbox_to_percentile
+  params:
+    percentile: 0.7
+    thickness: 2
