@@ -108,9 +108,9 @@ def cubic_upsampling3D(
 
     # Upsample to image size
     factor = (
-        t/sim_map[0],
-        h/sim_map[1],
-        w/sim_map[2]
+        t/sim_map.shape[0],
+        h/sim_map.shape[1],
+        w/sim_map.shape[2]
     )
     sim_map = zoom(sim_map, factor, order=3)
     if normalize:

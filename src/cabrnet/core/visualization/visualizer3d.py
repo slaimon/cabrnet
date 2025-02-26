@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import Any, Callable
 
+import PIL.Image
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,11 +13,11 @@ from torch import Tensor
 
 from cabrnet.core.utils.exceptions import check_mandatory_fields
 from cabrnet.core.utils.parser import load_config
-from cabrnet.core.visualization.upsampling import cubic_upsampling
+from cabrnet.core.visualization.upsampling import cubic_upsampling3D
 from cabrnet.core.visualization.view import supported_viewing_functions
 
 supported_attribution_functions = {
-    "cubic_upsampling": cubic_upsampling
+    "cubic_upsampling3D": cubic_upsampling3D
 }
 
 
@@ -90,20 +91,33 @@ class SimilarityVisualizer3D(nn.Module):
             img=img, img_tensor=img_tensor, proto_idx=proto_idx, device=device, location=location
         )
 
+        # slice up the volume (T, H, W) in T different pictures
         slices = []
         for idx in range(sim_map.shape[0]):
-            scan_slice = img_tensor[idx, :, :]
+            # slice up both the scan and the similarity map
+            scan_slice = img_tensor[:, idx, :, :] # channel 0 (all channels should contain the same data)
             sim_slice = sim_map[idx, :, :]
-            img = Image.fromarray(scan_slice.numpy())
+
+            # convert the scan slice to an image
+            scan_slice = scan_slice.transpose(0,2)
+            scan_slice = (scan_slice.numpy() * 255).astype(np.uint8)
+            img = Image.fromarray(scan_slice)
+
+            # visualize the attribution map on the image
             slices.append(self.view(img, sim_slice, **self.view_params))
 
-        height = np.ceil(np.sqrt(len(slices)))
-        slices = np.reshape(np.array(slices), (height, -1))
+        # arrange the pictures in a (roughly) square grid
+        def chunks(lst:list, n:int):
+            for i in range(0, len(lst), n):
+                yield lst[i:i + n]
+        height = int(np.ceil(np.sqrt(len(slices))))
+        slices = list(chunks(slices, height))
 
+        # produce a mosaic from the pictures.
         # mosaic functions from:
         # https://note.nkmk.me/en/python-pillow-concat-images/
 
-        def get_concat_h_multi_resize(im_list, resample=Image.BICUBIC):
+        def get_concat_h_multi_resize(im_list:list[PIL.Image.Image], resample=Image.Resampling.BICUBIC):
             min_height = min(im.height for im in im_list)
             im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
                               for im in im_list]
@@ -115,7 +129,7 @@ class SimilarityVisualizer3D(nn.Module):
                 pos_x += im.width
             return dst
 
-        def get_concat_v_multi_resize(im_list, resample=Image.BICUBIC):
+        def get_concat_v_multi_resize(im_list:list[PIL.Image.Image], resample=Image.Resampling.BICUBIC):
             min_width = min(im.width for im in im_list)
             im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=resample)
                               for im in im_list]
@@ -127,10 +141,9 @@ class SimilarityVisualizer3D(nn.Module):
                 pos_y += im.height
             return dst
 
-        def get_concat_tile_resize(im_list_2d, resample=Image.BICUBIC):
+        def get_concat_tile_resize(im_list_2d:list[list[PIL.Image.Image]], resample=Image.Resampling.BICUBIC):
             im_list_v = [get_concat_h_multi_resize(im_list_h, resample=resample) for im_list_h in im_list_2d]
             return get_concat_v_multi_resize(im_list_v, resample=resample)
-
 
         return get_concat_tile_resize(slices)
 
@@ -198,7 +211,7 @@ class SimilarityVisualizer3D(nn.Module):
         return parser
 
     @staticmethod
-    def build_from_config(config: str | dict[str, Any], model: nn.Module) -> SimilarityVisualizer:
+    def build_from_config(config: str | dict[str, Any], model: nn.Module) -> SimilarityVisualizer3D:
         r"""Builds a ProtoVisualizer from a configuration file or dictionary.
 
         Args:
@@ -233,7 +246,7 @@ class SimilarityVisualizer3D(nn.Module):
             raise NotImplementedError(f"Unknown viewing function {config_dict['view']['type']}")
         view_params = config_dict["view"]["params"] if "params" in config_dict["view"] else None
 
-        return SimilarityVisualizer(
+        return SimilarityVisualizer3D(
             model=model,
             attribution_fn=attribution_fn,
             view_fn=view_fn,
