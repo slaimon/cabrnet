@@ -99,14 +99,14 @@ class ProtoPNet3DClassifier(CaBRNetClassifier):
         r"""Performs classification using a linear layer.
 
         Args:
-            features (tensor): Convolutional features from extractor. Shape (N, D, H, W).
+            features (tensor): Convolutional features from extractor. Shape (N, D, T, H, W).
 
         Returns:
             Vector of logits. Shape (N, C).
             Tensor of min distances. Shape (N, P).
         """
-        similarities = self.similarity_layer.similarities(features, self.prototypes)  # Shape (N, P, H, W)
-        distances = self.similarity_layer.distances(features, self.prototypes)  # Shape (N, P, H, W)
+        similarities = self.similarity_layer.similarities(features, self.prototypes)  # Shape (N, P, T, H, W)
+        distances = self.similarity_layer.distances(features, self.prototypes)  # Shape (N, P, T, H, W)
         if self._compatibility_mode:
             # Reproduce legacy ProtoPNet operations
             min_distances = -torch.nn.functional.max_pool2d(
