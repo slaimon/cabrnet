@@ -21,12 +21,12 @@ optimizers:
       last_layer:
         lr: 0.000001
 
-num_epochs: 50
+num_epochs: 100
 
 periods:
   main_training:
     patience: 30
-    epoch_range: [0, 50]
+    epoch_range: [0, 100]
     optimizers: joint_optimizer
 
 auxiliary_info:
@@ -35,7 +35,7 @@ auxiliary_info:
     separability: -0.08
     regularization: 0.0001
   projection_config:
-    start_epoch: 26
+    start_epoch: 100
     frequency: 5
     num_ft_epochs: 1
 
