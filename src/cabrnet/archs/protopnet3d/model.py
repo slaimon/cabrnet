@@ -264,7 +264,7 @@ class ProtoPNet3D(CaBRNet):
                 optimizer_mngr.step()
 
             # Update progress bar
-            batch_accuracy = batch_stats["accuracy/train"]
+            batch_accuracy = batch_stats["accuracy"]
             batch_time = time.time() - ref_time
             postfix_str = (
                 f"Batch [{batch_idx + 1}/{len(train_loader)}], "
@@ -277,7 +277,7 @@ class ProtoPNet3D(CaBRNet):
             if not train_info:
                 for key in batch_stats.keys():
                     train_info[key+"/train"] = batch_stats[key]
-            for key, value in batch_stats.items():
+            for key, value in train_info.items():
                 train_info[key] += value * xs.size(0)
 
             total_batch_time += batch_time
