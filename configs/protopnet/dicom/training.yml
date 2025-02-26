@@ -8,11 +8,11 @@ optimizers:
     type: Adam
     groups:
       backbone:
-        lr: 0.00001
+        lr: 0.0000001
         weight_decay_rate: 0.01
         momentum: 0.9
       prototypes:
-        lr: 0.00001
+        lr: 0.0000001
         weight_decay_rate: 0.01
         momentum: 0.9
   last_layer_optimizer:
