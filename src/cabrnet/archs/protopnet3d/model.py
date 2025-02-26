@@ -140,12 +140,13 @@ class ProtoPNet3D(CaBRNet):
             # Load state dictionary
             super().load_state_dict(state_dict, **kwargs)
 
-    def loss(self, model_output: Any, label: torch.Tensor, **kwargs) -> tuple[torch.Tensor, dict[str, float]]:
+    def loss(self, model_output: Any, label: torch.Tensor, stats_tag: str="" , **kwargs) -> tuple[torch.Tensor, dict[str, float]]:
         r"""Loss function.
 
         Args:
             model_output (Any): Model output, in this case a tuple containing the prediction and the minimum distances.
             label (tensor): Batch labels.
+            stats_tag (str): How to mark the batch statistics (default: no mark)
 
         Returns:
             Loss tensor and batch statistics.
@@ -184,13 +185,14 @@ class ProtoPNet3D(CaBRNet):
         )
 
         batch_accuracy = torch.sum(torch.eq(torch.argmax(output, dim=1), label)).item() / len(label)
+        stats_tag = "/"+stats_tag if stats_tag != "" else ""
         stats = {
-            "loss": loss.item(),
-            "accuracy": batch_accuracy,
-            "cross_entropy": cross_entropy.item(),
-            "cluster_cost": cluster_cost.item(),
-            "separation_cost": separation_cost.item(),
-            "l1": l1.item(),
+            "loss"+stats_tag: loss.item(),
+            "accuracy"+stats_tag: batch_accuracy,
+            "cross_entropy"+stats_tag: cross_entropy.item(),
+            "cluster_cost"+stats_tag: cluster_cost.item(),
+            "separation_cost"+stats_tag: separation_cost.item(),
+            "l1"+stats_tag: l1.item(),
         }
 
         return loss, stats
@@ -254,7 +256,7 @@ class ProtoPNet3D(CaBRNet):
 
             # Perform inference and compute loss
             ys_pred, distances = self.forward(xs)
-            batch_loss, batch_stats = self.loss((ys_pred, distances), ys)
+            batch_loss, batch_stats = self.loss((ys_pred, distances), ys, "train")
 
             # Compute the gradient and update parameters
             batch_loss.backward()
@@ -264,7 +266,7 @@ class ProtoPNet3D(CaBRNet):
                 optimizer_mngr.step()
 
             # Update progress bar
-            batch_accuracy = batch_stats["accuracy"]
+            batch_accuracy = batch_stats["accuracy/train"]
             batch_time = time.time() - ref_time
             postfix_str = (
                 f"Batch [{batch_idx + 1}/{len(train_loader)}], "
@@ -299,11 +301,6 @@ class ProtoPNet3D(CaBRNet):
 
         # add validation set statistics
         if "validation_set" in dataloaders.keys():
-            # move all other stats to subfolder
-            for stat in train_info.keys():
-                train_info[stat+"/train"] = train_info[stat]
-                del train_info[stat]
-
             # evaluate model on validation set and log stats
             eval_info = self.evaluate(dataloader=dataloaders["validation_set"], device=device, verbose=verbose)
             train_info["loss/val"] = eval_info["avg_loss"]
