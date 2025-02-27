@@ -8,24 +8,24 @@ optimizers:
     type: Adam
     groups:
       last_layer:
-        lr: 0.0000436
+        lr: 0.0000000005
         weight_decay: 0.001
   joint_optimizer:
     type: Adam
     groups:
       backbone:
-        lr: 0.001
-        weight_decay_rate: 0.01
+        lr: 0.000000005
+        weight_decay_rate: 0.0
         momentum: 0.9
       prototypes:
-        lr: 0.001
-        weight_decay_rate: 0.01
+        lr: 0.000000005
+        weight_decay_rate: 0.0
         momentum: 0.9
   last_layer_optimizer:
     type: Adam
     groups:
       last_layer:
-        lr: 0.00001
+        lr: 0.0000000005
 
 num_epochs: 100
 

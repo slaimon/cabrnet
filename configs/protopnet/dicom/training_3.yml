@@ -4,26 +4,36 @@ param_groups:
   last_layer: classifier.last_layer
 
 optimizers:
+  warmup_optimizer:
+    type: Adam
+    groups:
+      last_layer:
+        lr: 0.0436
+        weight_decay: 0.001
   joint_optimizer:
     type: Adam
     groups:
       backbone:
-        lr: 0.000001
-        weight_decay_rate: 0.01
+        lr: 0.1
+        weight_decay_rate: 0.0
         momentum: 0.9
       prototypes:
-        lr: 0.000001
-        weight_decay_rate: 0.01
+        lr: 0.1
+        weight_decay_rate: 0.0
         momentum: 0.9
   last_layer_optimizer:
     type: Adam
     groups:
       last_layer:
-        lr: 0.000001
+        lr: 0.01
 
 num_epochs: 100
 
 periods:
+  warmup:
+    num_epochs: 15
+    freeze: [ backbone ]
+    optimizers: warmup_optimizer
   main_training:
     patience: 30
     epoch_range: [0, 100]
