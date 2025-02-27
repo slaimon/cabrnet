@@ -277,8 +277,8 @@ class ProtoPNet3D(CaBRNet):
             if not train_info:
                 for key in batch_stats.keys():
                     train_info[key+"/train"] = batch_stats[key]
-            for key, value in train_info.items():
-                train_info[key] += value * xs.size(0)
+            for key, value in batch_stats.items():
+                train_info[key+"/train"] += value * xs.size(0)
 
             total_batch_time += batch_time
             total_data_time += data_time
