@@ -35,7 +35,6 @@ periods:
     freeze: [ backbone ]
     optimizers: warmup_optimizer
   main_training:
-    patience: 30
     epoch_range: [0, 100]
     optimizers: joint_optimizer
 
