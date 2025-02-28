@@ -330,8 +330,6 @@ class ProtoPNet3D(CaBRNet):
             Dictionary containing learning statistics.
         """
 
-        logger.info(f"using device {device}")
-
         # Train for exactly one epoch using the OptimizerManager
         train_info = self._train_epoch(
             dataloaders=dataloaders,
