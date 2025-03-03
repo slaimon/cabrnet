@@ -3,6 +3,7 @@ train_set:
   name: load_torch_dataset
   params:
     path: data/prostate/train
+    augment: true
   batch_size: 8
   shuffle: true
 
@@ -11,6 +12,7 @@ projection_set:
   name: load_torch_dataset
   params:
     path: data/prostate/train
+    augment: false
   batch_size: 8
   shuffle: false
 
@@ -19,6 +21,7 @@ validation_set:
   name: load_torch_dataset
   params:
     path: data/prostate/valid
+    augment: false
   batch_size: 8
   shuffle: false
 
@@ -27,5 +30,6 @@ test_set:
   name: load_torch_dataset
   params:
     path: data/prostate/test
+    augment: false
   batch_size: 8
   shuffle: false

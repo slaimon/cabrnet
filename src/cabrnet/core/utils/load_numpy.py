@@ -70,7 +70,7 @@ class AugmentedTensorDataset(Dataset):
 
 def load_torch_dataset(
         path: str,
-        transform: Callable[[torch.Tensor], torch.Tensor] = None
+        augment: bool
 ):
     data = torch.load(path+".data.pt")
     labels = torch.load(path+".labels.pt")
@@ -78,7 +78,9 @@ def load_torch_dataset(
     # add the channel dimension
     data = data.unsqueeze(1).expand(-1,3,-1,-1,-1)
 
-    if not transform:
+    if augment:
         transform = Composition([random_rotation, random_reflection])
+    else:
+        transform = Composition([])
 
     return AugmentedTensorDataset(data, labels, transform)

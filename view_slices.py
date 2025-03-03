@@ -48,7 +48,7 @@ def mosaic(data:list[torch.Tensor], slice:int):
     return get_concat_tile_resize(imgs)
 
 def mosaic_gif(dataset:str, duration:int):
-    data = [ x[0,:,:,:] for x, _ in load_torch_dataset(dataset) ]
+    data = [ x[0,:,:,:] for x, _ in load_torch_dataset(dataset, True) ]
     print(f"shape of one sample: {data[0].shape}")
     thickness = data[0].shape[0]
     frames = [ mosaic(data, i ) for i in range(thickness) ]
