@@ -39,22 +39,21 @@ def chunks(lst: list, n: int):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-path = "./data/prostate/"
+from cabrnet.core.utils.load_numpy import load_torch_dataset
 
-def mosaic(dataset:str, slice:int):
-    path_ = path + dataset + ".data.pt"
-    data = torch.load(path_)
-    slices = [ data[i,slice,:,:] for i in range(data.shape[0]) ]
+def mosaic(data:list[torch.Tensor], slice:int):
+    slices = [ x[slice,:,:] for x in data ]
     imgs = [ to_img(x) for x in slices ]
     imgs = list(chunks(imgs, int(np.floor(np.sqrt(len(imgs))))))
     return get_concat_tile_resize(imgs)
 
 def mosaic_gif(dataset:str, duration:int):
-    path_ = path + dataset + ".data.pt"
-    data = torch.load(path_)
-    thickness = data.shape[1]
-    frames = [ mosaic(dataset, i ) for i in range(thickness) ]
-    frames[0].save(dataset+".gif", save_all=True, append_images=frames[1:], optimize=False, duration=duration, loop=0)
+    data = [ x[0,:,:,:] for x, _ in load_torch_dataset(dataset) ]
+    print(f"shape of one sample: {data[0].shape}")
+    thickness = data[0].shape[0]
+    frames = [ mosaic(data, i ) for i in range(thickness) ]
+    frames[0].save("out.gif", save_all=True, append_images=frames[1:], optimize=False, duration=duration, loop=0)
 
 if __name__ == "__main__":
-    mosaic_gif("test", 60)
+    dataset = "./data/prostate/test"
+    mosaic_gif(dataset, 60)
