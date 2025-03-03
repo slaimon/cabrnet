@@ -18,7 +18,7 @@ validation_set:
   module: cabrnet.core.utils.load_numpy
   name: load_torch_dataset
   params:
-    path: data/prostate/valid
+    path: data/prostate/train_small
   batch_size: 8
   shuffle: false
 
