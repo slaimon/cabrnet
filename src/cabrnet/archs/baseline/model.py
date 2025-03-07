@@ -136,7 +136,7 @@ class Baseline(CaBRNet):
         # Clean gradients after last batch
         optimizer_mngr.zero_grad()
 
-        train_info = {f"train/{key}": value / nb_inputs for key, value in train_info.items()}
+        train_info = {f"{key}/train": value / nb_inputs for key, value in train_info.items()}
 
         # Update batch_num with effective value
         batch_num = batch_idx + 1
@@ -149,6 +149,6 @@ class Baseline(CaBRNet):
 
         if dataloaders.get("validation_set"):
             eval_info = self.evaluate(dataloaders["validation_set"], device)
-            train_info.update({f"val/{key}": value for key, value in eval_info.items()})
+            train_info.update({f"{key}/val": value for key, value in eval_info.items()})
 
         return train_info

@@ -1,5 +1,5 @@
 top_arch:
-  module: cabrnet.baseline.model
+  module: cabrnet.archs.baseline.model
   name: Baseline
 
 extractor:
@@ -10,6 +10,14 @@ extractor:
     repo_or_dir: facebookresearch/pytorchvideo
     pretrained: True
   add_on:
+    conv:
+      type: Conv3d
+      params:
+        in_channels: 2048
+        out_channels: 2048
+        kernel_size: 2
+        stride: 1
+        padding: 0
     flatten:
       type: Flatten
     bottleneck:
@@ -31,7 +39,7 @@ similarity:
   ProtoPNetSimilarity
 
 classifier:
-  module: cabrnet.baseline.decision
+  module: cabrnet.archs.baseline.decision
   name: DummyClassifier
   params:
     num_classes: 2
