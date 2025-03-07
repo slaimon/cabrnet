@@ -17,10 +17,10 @@ optimizers:
     groups:
       backbone:
         lr: 0.0001
-        weight_decay: 0.00
+        weight_decay: 0.01
       addons:
         lr: 0.0001
-        weight_decay: 0.00
+        weight_decay: 0.01
 
 num_epochs: 50
 periods:
