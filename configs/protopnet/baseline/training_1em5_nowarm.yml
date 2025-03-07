@@ -1,0 +1,20 @@
+param_groups:
+  backbone: extractor.convnet
+  addons: extractor.add_on
+
+optimizers:
+  # Main optimizer
+  joint_optimizer:
+    type: Adam
+    groups:
+      backbone:
+        lr: 0.00001
+        weight_decay: 0.00
+      addons:
+        lr: 0.00001
+        weight_decay: 0.00
+
+num_epochs: 50
+periods:
+  main_training:
+    optimizers: joint_optimizer

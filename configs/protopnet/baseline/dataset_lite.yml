@@ -3,7 +3,7 @@ train_set:
   name: load_torch_dataset
   params:
     path: data/prostate/test
-    augment: true
+    augment: false
   batch_size: 2
   shuffle: true
 
