@@ -36,7 +36,7 @@ extractor:
         bias: True
 
 similarity:
-  ProtoPNetSimilarity
+  ProtoPNet3DSimilarity
 
 classifier:
   module: cabrnet.archs.baseline.decision
