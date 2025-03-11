@@ -1,0 +1,46 @@
+top_arch:
+  module: cabrnet.archs.protopnet3d.model
+  name: ProtoPNet3D
+
+extractor:
+  backbone:
+    arch: generic_onnx_model
+    # Not necessary for ONNX models
+    weights: None
+    params:
+      onnx_path: examples/resnet50TL3D.onnx
+  add_on:
+    conv:
+      type: Conv3d
+      params:
+        in_channels: 2048
+        out_channels: 2048
+        kernel_size: 2
+        stride: 1
+        padding: 0
+    flatten:
+      type: Flatten
+    bottleneck:
+      type: Linear
+      params:
+        in_features: 2048
+        out_features: 64
+        bias: True
+    act:
+      type: ReLU
+    decision:
+      type: Linear
+      params:
+        in_features: 64
+        out_features: 2
+        bias: True
+
+
+similarity:
+  name: ProtoPNet3DSimilarity
+
+classifier:
+  module: cabrnet.archs.baseline.decision
+  name: DummyClassifier
+  params:
+    num_classes: 2
