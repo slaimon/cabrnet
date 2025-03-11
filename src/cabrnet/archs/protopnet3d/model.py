@@ -44,6 +44,7 @@ class ProtoPNet3D(CaBRNet):
             "clustering": 0.8,
             "separability": -0.08,
             "regularization": 0.0001,
+            "cross_entropy": 1.0,
         }
         self.projection_config = {
             "start_epoch": 10,
@@ -176,10 +177,7 @@ class ProtoPNet3D(CaBRNet):
         l1_mask = 1 - torch.t(self.classifier.proto_class_map)
         l1 = (self.classifier.last_layer.weight * l1_mask).norm(p=1)
 
-        if "cross_entropy" in self.loss_coefficients.keys():
-            cross_entropy_weight = self.loss_coefficients["cross_entropy"]
-        else:
-            cross_entropy_weight = 1.0
+        cross_entropy_weight = self.loss_coefficients["cross_entropy"]
 
         loss = (
             cross_entropy_weight * cross_entropy
