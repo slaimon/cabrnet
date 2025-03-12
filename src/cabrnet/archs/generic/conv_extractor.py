@@ -138,6 +138,8 @@ class ConvExtractor(nn.Module):
                     f"Could not create feature extractor from ONNX model. Possible layer names: {model.available_node_names()}"
                 )
                 raise e
+        elif isinstance(model, GraphModule):
+            self.convnet = model
         else:
             try:
                 self.convnet = create_feature_extractor(model=model, return_nodes=return_nodes)
@@ -148,7 +150,7 @@ class ConvExtractor(nn.Module):
                 raise e
         # Dummy inference to recover number of output channels from the feature extractor
         self.convnet.eval()
-        output_tensors = self.convnet(torch.zeros((1, 3, 224, 224, 224)))
+        output_tensors = self.convnet(torch.zeros((1, 1, 224, 224, 224)))
 
         add_ons, self.output_channels = {}, {}
         for pipeline_name in self.source_layers.keys():
