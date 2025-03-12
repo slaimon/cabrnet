@@ -165,20 +165,22 @@ class GenericONNXModel(nn.Module):
         return self.variants.original_path
 
     def get_output_shape_of_node(self, node: onnx.ValueInfoProto) -> Tuple[Union[int, str], int, int, int]:
-        r"""Returns the output shape of a given ONNX node. The shape is assumed
-                to have 4 dimensions.
+        r"""Returns the output shape of a given ONNX node.
 
         Args:
             node (ValueInfoProto): An ONNX node to recover the node from.
         """
-        assert len(node.type.tensor_type.shape.dim) == 4
-        [b, x, y, z] = node.type.tensor_type.shape.dim
-        if hasattr(b, "dim_param"):
-            b_v = b.dim_param
+
+        dims = node.type.tensor_type.shape.dim
+
+        shape = [ x.dim_value for x in dims[1:] ]
+        if hasattr(dims[0], "dim_param"):
+            b_v = dims[0].dim_param
         else:
-            b_v = b.dim_value
-        out_shape = (b_v, x.dim_value, y.dim_value, z.dim_value)
-        return out_shape
+            b_v = dims[0].dim_value
+
+        shape.insert(0, b_v)
+        return tuple(shape)
 
     def get_output_shape_of_layer(
         self, model: onnx.ModelProto, layer_cut: str
