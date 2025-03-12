@@ -70,13 +70,16 @@ class AugmentedTensorDataset(Dataset):
 
 def load_torch_dataset(
         path: str,
-        augment: bool
+        augment: bool,
+        RGB: bool=True
 ):
     data = torch.load(path+".data.pt")
     labels = torch.load(path+".labels.pt")
 
     # add the channel dimension
-    data = data.unsqueeze(1).expand(-1,3,-1,-1,-1)
+    data = data.unsqueeze(1)
+    if RGB:
+        data = data.expand(-1,3,-1,-1,-1)
 
     if augment:
         transform = Composition([random_rotation, random_reflection])
