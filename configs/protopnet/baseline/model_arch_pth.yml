@@ -1,0 +1,23 @@
+top_arch:
+  module: cabrnet.archs.protopnet3d.model
+  name: ProtoPNet3D
+
+extractor:
+  backbone:
+    arch: graph_module
+    weights: None
+    params:
+      pth_path: examples/resnet18-3d.onnx
+  convnet:
+    # get the outputs before softmax
+    source_layer: new_fc_Add
+
+
+similarity:
+  name: ProtoPNet3DSimilarity
+
+classifier:
+  module: cabrnet.archs.baseline.decision
+  name: DummyClassifier
+  params:
+    num_classes: 2
