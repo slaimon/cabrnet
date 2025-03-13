@@ -10,7 +10,46 @@ extractor:
       pth_path: examples/resnet18-3d.pth
   convnet:
     # get the outputs before softmax
-    source_layer: new_fc
+    source_layer: res5b_relu
+    add_on:
+      conv1:
+        type: Conv3d
+        params:
+          in_channels: 512
+          out_channels: 128
+          kernel_size: 3
+          stride: 1
+          padding: [1,0,0]
+          bias: true
+      act1:
+        type: ReLU
+      conv2:
+        type: Conv3d
+        params:
+          in_channels: 128
+          out_channels: 128
+          kernel_size: 3
+          stride: 1
+          padding: [1,0,0]
+          bias: true
+      act2:
+        type: ReLU
+      flatten:
+        type: Flatten
+      linear1:
+        type: Linear
+        params:
+          in_features: 2048
+          out_features: 128
+      act3:
+        type: ReLU
+      linear2:
+        type: Linear
+        params:
+          in_features: 128
+          out_features: 2
+
+
 
 
 similarity:
