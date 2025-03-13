@@ -18,5 +18,5 @@ classifier:
   name: ProtoPNet3DClassifier
   params:
     num_classes: 2
-    num_proto_per_class: 10
+    num_proto_per_class: 3
     proto_init_mode: SHIFTED_NORMAL
