@@ -4,10 +4,10 @@ top_arch:
 
 extractor:
   backbone:
-    arch: graph_module
+    arch: matlab_3d_resnet
     weights: None
     params:
-      pth_path: examples/resnet18-3d.onnx
+      pth_path: examples/resnet18-3d.pth
   convnet:
     # get the outputs before softmax
     source_layer: new_fc_Add
