@@ -1,6 +1,6 @@
 top_arch:
-  module: cabrnet.archs.protopnet3d.model
-  name: ProtoPNet3D
+  module: cabrnet.archs.baseline.model
+  name: Baseline
 
 extractor:
   backbone:
@@ -10,7 +10,7 @@ extractor:
       pth_path: examples/resnet18-3d.pth
   convnet:
     # get the outputs before softmax
-    source_layer: new_fc_Add
+    source_layer: new_fc
 
 
 similarity:

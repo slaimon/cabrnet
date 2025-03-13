@@ -86,4 +86,5 @@ def load_torch_dataset(
     else:
         transform = Composition([])
 
+    labels = labels.type(torch.LongTensor)
     return AugmentedTensorDataset(data, labels, transform)

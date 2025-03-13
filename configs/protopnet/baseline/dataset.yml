@@ -4,6 +4,7 @@ train_set:
   params:
     path: data/prostate/train
     augment: true
+    RGB: false
   batch_size: 8
   shuffle: true
 
@@ -13,6 +14,7 @@ projection_set:
   params:
     path: data/prostate/train
     augment: false
+    RGB: false
   batch_size: 8
   shuffle: false
 
@@ -22,6 +24,7 @@ validation_set:
   params:
     path: data/prostate/valid
     augment: false
+    RGB: false
   batch_size: 8
   shuffle: false
 
@@ -31,5 +34,6 @@ test_set:
   params:
     path: data/prostate/test
     augment: false
+    RGB: false
   batch_size: 8
   shuffle: false
