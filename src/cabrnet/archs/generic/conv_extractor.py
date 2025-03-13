@@ -138,8 +138,6 @@ class ConvExtractor(nn.Module):
                     f"Could not create feature extractor from ONNX model. Possible layer names: {model.available_node_names()}"
                 )
                 raise e
-        elif isinstance(model, GraphModule):
-            self.convnet = model
         else:
             try:
                 self.convnet = create_feature_extractor(model=model, return_nodes=return_nodes)
