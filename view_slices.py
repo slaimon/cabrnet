@@ -39,7 +39,7 @@ def chunks(lst: list, n: int):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-from cabrnet.core.utils.load_numpy import load_torch_dataset
+from cabrnet.core.utils.load_3d import load_torch_dataset
 
 def mosaic(data:list[torch.Tensor], slice:int):
     slices = [ x[slice,:,:] for x in data ]

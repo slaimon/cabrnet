@@ -1,8 +1,9 @@
 import random
+from loguru import logger
+from fractions import Fraction
 from typing import Callable
 
 import torch
-import numpy as np
 
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
@@ -87,3 +88,24 @@ def load_torch_dataset(
         transform = Composition([])
 
     return AugmentedTensorDataset(data, labels, transform)
+
+from torchvision.datasets import Kinetics
+from torchvision import transforms as T
+from tqdm import tqdm
+
+def load_kinetics400 (
+        path: str,
+        split: str,
+        clip_length: int = 5,
+        step_between_clips: int = 5,
+        ratio: Fraction = Fraction(10,7),
+        height: int = 180
+):
+    logger.info(f"Loading Kinetics 400 split {split}...")
+    k = Kinetics(path, frames_per_clip=clip_length, step_between_clips=step_between_clips, split=split)
+    transform = T.Resize((int(height * ratio), height), interpolation=T.InterpolationMode.NEAREST)
+
+    logger.info(f"Transforming video clips...")
+    for i in tqdm(range(len(k))):
+        clip = k[i][0]
+        frames = [ transform(clip[i,:,:,:]) ]
