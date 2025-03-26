@@ -1,12 +1,15 @@
+import torch
 import random
 from loguru import logger
 from fractions import Fraction
 from typing import Callable
 
-import torch
-
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
+
+from torchvision.datasets import Kinetics
+from torchvision import transforms as Transforms
+from tqdm import tqdm
 
 def load_rand(in_shape: tuple[int], size: int, channels: int=3):
     expansion_shape = (-1,channels) + len(in_shape)*(-1,)
@@ -89,10 +92,6 @@ def load_torch_dataset(
 
     return AugmentedTensorDataset(data, labels, transform)
 
-from torchvision.datasets import Kinetics
-from torchvision import transforms as T
-from tqdm import tqdm
-
 def load_kinetics400 (
         path: str,
         split: str,
@@ -102,10 +101,24 @@ def load_kinetics400 (
         height: int = 180
 ):
     logger.info(f"Loading Kinetics 400 split {split}...")
-    k = Kinetics(path, frames_per_clip=clip_length, step_between_clips=step_between_clips, split=split)
-    transform = T.Resize((int(height * ratio), height), interpolation=T.InterpolationMode.NEAREST)
+    k = Kinetics(path, frames_per_clip=clip_length, step_between_clips=step_between_clips, split=split, output_format='TCHW')
+    transform = Transforms.Resize((height, int(height * ratio)), interpolation=Transforms.InterpolationMode.NEAREST)
+    num_clips = len(k)
 
     logger.info(f"Transforming video clips...")
-    for i in tqdm(range(len(k))):
+    B, C, T, H, W = (num_clips, 3, clip_length, height, int(height*ratio))
+    clips = torch.empty((B, C, T, H, W))
+    labels = torch.empty(num_clips)
+
+    for i in tqdm(range(num_clips)):
         clip = k[i][0]
-        frames = [ transform(clip[i,:,:,:]) ]
+        frames = torch.empty((T, C, H, W))
+        for j in range(clip.shape[0]):
+            frame = transform(clip[j,:,:,:]) # C, H, W
+            frame = frame / 255.0
+            frames[j] = frame
+        frames = torch.transpose(frames, 0, 1) # C, T, H, W
+        clips[i] = frames
+        labels[i] = k[i][2]
+
+    return TensorDataset(clips, labels) # needs B, C, T, H, W
