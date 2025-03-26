@@ -9,7 +9,7 @@ train_set:
 
 projection_set:
   module: cabrnet.core.utils.load_3d
-  name: load_torch_dataset
+  name: load_kinetics400
   params:
     path: data/kinetics
     split: val
@@ -18,7 +18,7 @@ projection_set:
 
 validation_set:
   module: cabrnet.core.utils.load_3d
-  name: load_torch_dataset
+  name: load_kinetics400
   params:
     path: data/kinetics
     split: val
@@ -27,7 +27,7 @@ validation_set:
 
 test_set:
   module: cabrnet.core.utils.load_3d
-  name: load_torch_dataset
+  name: load_kinetics400
   params:
     path: data/kinetics
     split: val
