@@ -1,0 +1,45 @@
+top_arch:
+  module: cabrnet.archs.baseline.model
+  name: Baseline
+
+extractor:
+  backbone:
+    module: torch.hub
+    arch: r2plus1d_r50
+    layer: blocks.5.dropout
+    repo_or_dir: facebookresearch/pytorchvideo
+    pretrained: True
+  add_on:
+    conv:
+      type: Conv3d
+      params:
+        in_channels: 2048
+        out_channels: 2048
+        kernel_size: 2
+        stride: 1
+        padding: 0
+    flatten:
+      type: Flatten
+    bottleneck:
+      type: Linear
+      params:
+        in_features: 2048
+        out_features: 64
+        bias: True
+    act:
+      type: ReLU
+    decision:
+      type: Linear
+      params:
+        in_features: 64
+        out_features: 2
+        bias: True
+
+similarity:
+  ProtoPNet3DSimilarity
+
+classifier:
+  module: cabrnet.archs.baseline.decision
+  name: DummyClassifier
+  params:
+    num_classes: 2
