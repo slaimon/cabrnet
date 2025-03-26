@@ -7,6 +7,7 @@ from typing import Callable
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
 
+from scipy.ndimage import zoom
 from torchvision.datasets import Kinetics
 from torchvision import transforms as Transforms
 from tqdm import tqdm
@@ -111,14 +112,14 @@ def load_kinetics400 (
     labels = torch.empty(num_clips)
 
     for i in tqdm(range(num_clips)):
-        clip = k[i][0]
-        frames = torch.empty((T, C, H, W))
-        for j in range(clip.shape[0]):
-            frame = transform(clip[j,:,:,:]) # C, H, W
-            frame = frame / 255.0
-            frames[j] = frame
-        frames = torch.transpose(frames, 0, 1) # C, T, H, W
-        clips[i] = frames
+        clip = k[i][0] / 255.0
+        resize_factor = (1,
+                         1,
+                         H / clip.shape[2],
+                         W / clip.shape[3])
+        frames = torch.tensor(zoom(clip, resize_factor, order=0))
+        
+        clips[i] = torch.transpose(frames, 0, 1) # C, T, H, W
         labels[i] = k[i][2]
 
     return TensorDataset(clips, labels) # needs B, C, T, H, W
