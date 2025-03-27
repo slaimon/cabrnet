@@ -5,6 +5,7 @@ from fractions import Fraction
 from typing import Callable
 
 from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 
 from scipy.ndimage import zoom
@@ -92,6 +93,24 @@ def load_torch_dataset(
         transform = Composition([])
 
     return AugmentedTensorDataset(data, labels, transform)
+
+class DefaultKineticsTransform(torch.nn.Module):
+    def __init__(self,
+                 height:int = 180,
+                 ratio:Fraction = Fraction(10,7)
+    ):
+        super().__init__()
+        self.h = height
+        self.w = int(ratio * self.h)
+        self.transform = Transforms.Resize((self.h, self.w), interpolation=Transforms.InterpolationMode.NEAREST)
+
+    def forward(self, x): # x is the video component of a clip (tensor T, C, H, W)
+        clip = x / 255.0
+        t, c, h, w = (clip.shape[0], 3, self.h, self.w)
+        frames = torch.empty((t, c, h, w))
+        for j in range(clip.shape[0]):
+            frames[j] = self.transform(clip[j,:,:,:]) # C, H, W
+        return torch.transpose(frames, 0, 1) # C, T, H, W
 
 def load_kinetics400 (
         path: str,
