@@ -164,10 +164,10 @@ class DatasetManager:
             # Load dataset
             module = importlib.import_module(dconfig["module"])
             dataset["dataset"] = getattr(module, dconfig["name"])(**params)
-            if "transform" in params:
-                # Remove image preprocessing to recover raw images
-                params["transform"] = None
-            dataset["raw_dataset"] = getattr(module, dconfig["name"])(**params)
+      #      if "transform" in params:
+      #          # Remove image preprocessing to recover raw images
+      #          params["transform"] = None
+      #      dataset["raw_dataset"] = getattr(module, dconfig["name"])(**params)
             if load_segmentation:
                 try:
                     params["root"] += "_seg"
@@ -221,16 +221,16 @@ class DatasetManager:
 
         for dataset_name in datasets:
             dataset = _safe_item_load(datasets[dataset_name]["dataset"], Dataset)
-            raw_dataset = _safe_item_load(datasets[dataset_name]["raw_dataset"], Dataset)
+            #raw_dataset = _safe_item_load(datasets[dataset_name]["raw_dataset"], Dataset)
             batch_size = _safe_item_load(datasets[dataset_name]["batch_size"], int)
             shuffle = _safe_item_load(datasets[dataset_name]["shuffle"], bool)
             num_workers = _safe_item_load(datasets[dataset_name]["num_workers"], int)
             dataloaders[dataset_name] = DataLoader(
                 dataset=dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
             )
-            dataloaders[dataset_name + "_raw"] = DataLoader(
-                dataset=raw_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
-            )
+        #    dataloaders[dataset_name + "_raw"] = DataLoader(
+        #        dataset=raw_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
+        #    )
             if load_segmentation:
                 try:
                     seg_dataset = _safe_item_load(datasets[dataset_name]["seg_dataset"], Dataset)
