@@ -112,33 +112,40 @@ class DefaultKineticsTransform(torch.nn.Module):
             frames[j] = self.transform(clip[j,:,:,:]) # C, H, W
         return torch.transpose(frames, 0, 1) # C, T, H, W
 
+class KineticsDataset(Dataset):
+    def __init__(self,
+                 path: str,
+                 split: str,
+                 transform: str = "default",
+                 clip_length: int = 5,
+                 step_between_clips: int = 5,
+                 ratio: Fraction = Fraction(10, 7),
+                 height: int = 180
+                 ):
+        if transform == "default":
+            transform = DefaultKineticsTransform(height, ratio)
+        else:
+            raise ValueError(f"load_kinetics400: unknown transform name \"{transform}\"")
+
+        logger.info(f"Loading Kinetics 400 split {split}...")
+        k = Kinetics(path,
+                     frames_per_clip=clip_length,
+                     step_between_clips=step_between_clips,
+                     split=split,
+                     output_format='TCHW',
+                     transform=transform,
+                     num_workers=4)
+
+        self.k = k
+
+    def __len__(self):
+        return len(self.k)
+
+    def __getitem__(self, item):
+        return (self.k[item][0], self.k[item][2])
+
 def load_kinetics400 (
         path: str,
-        split: str,
-        clip_length: int = 5,
-        step_between_clips: int = 5,
-        ratio: Fraction = Fraction(10,7),
-        height: int = 180
+        split: str
 ):
-    logger.info(f"Loading Kinetics 400 split {split}...")
-    k = Kinetics(path, frames_per_clip=clip_length, step_between_clips=step_between_clips, split=split, output_format='TCHW')
-    transform = Transforms.Resize((height, int(height * ratio)), interpolation=Transforms.InterpolationMode.NEAREST)
-    num_clips = len(k)
-
-    logger.info(f"Transforming video clips...")
-    B, C, T, H, W = (num_clips, 3, clip_length, height, int(height*ratio))
-    clips = torch.empty((B, C, T, H, W))
-    labels = torch.empty(num_clips)
-
-    for i in tqdm(range(num_clips)):
-        clip = k[i][0] / 255.0
-        resize_factor = (1,
-                         1,
-                         H / clip.shape[2],
-                         W / clip.shape[3])
-        frames = torch.tensor(zoom(clip, resize_factor, order=0))
-        
-        clips[i] = torch.transpose(frames, 0, 1) # C, T, H, W
-        labels[i] = k[i][2]
-
-    return TensorDataset(clips, labels) # needs B, C, T, H, W
+    return KineticsDataset(path, split)
