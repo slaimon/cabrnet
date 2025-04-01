@@ -146,6 +146,11 @@ class KineticsDataset(Dataset):
 
 def load_kinetics400 (
         path: str,
-        split: str
+        split: str,
+        transform: str = "default",
+        clip_length: int = 5,
+        step_between_clips: int = 150,
+        ratio: Fraction = Fraction(10, 7),
+        height: int = 180
 ):
-    return KineticsDataset(path, split)
+    return KineticsDataset(path, split, transform, clip_length, step_between_clips, ratio, height)
