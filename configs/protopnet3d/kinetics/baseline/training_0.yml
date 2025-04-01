@@ -1,0 +1,28 @@
+param_groups:
+  backbone: extractor.convnet
+  addons: extractor.add_on
+
+optimizers:
+  # Optimizer used during the first epochs
+  warmup_optimizer:
+    type: Adam 
+    groups:
+      addons:
+        lr: 0.01055
+        weight_decay: 0.001
+
+  # Main optimizer
+  joint_optimizer:
+    type: Adam
+    groups:
+      backbone:
+        lr: 0.00346
+        weight_decay: 0.001
+      addons:
+        lr: 0.00510
+        weight_decay: 0.001
+
+num_epochs: 100
+periods:
+  main_training:
+    optimizers: joint_optimizer
