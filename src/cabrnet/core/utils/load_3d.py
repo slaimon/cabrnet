@@ -149,7 +149,7 @@ def load_kinetics400 (
         split: str,
         transform: str = "default",
         clip_length: int = 5,
-        step_between_clips: int = 150,
+        step_between_clips: int = 200,
         ratio: Fraction = Fraction(10, 7),
         height: int = 180
 ):
