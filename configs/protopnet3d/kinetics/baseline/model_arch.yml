@@ -44,6 +44,8 @@ extractor:
         in_features: 64
         out_features: 2
         bias: True
+    activation:
+      type: Softmax
 
 similarity:
   ProtoPNet3DSimilarity
