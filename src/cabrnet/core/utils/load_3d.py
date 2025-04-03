@@ -5,13 +5,10 @@ from fractions import Fraction
 from typing import Callable
 
 from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 
-from scipy.ndimage import zoom
 from torchvision.datasets import Kinetics
 from torchvision import transforms as Transforms
-from tqdm import tqdm
 
 def load_rand(in_shape: tuple[int], size: int, channels: int=3):
     expansion_shape = (-1,channels) + len(in_shape)*(-1,)
@@ -142,7 +139,7 @@ class KineticsDataset(Dataset):
         return len(self.k)
 
     def __getitem__(self, item):
-        return (self.k[item][0], self.k[item][2])
+        return self.k[item][0], self.k[item][2]
 
 def load_kinetics400 (
         path: str,

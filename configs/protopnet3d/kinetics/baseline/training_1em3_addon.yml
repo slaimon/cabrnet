@@ -11,7 +11,7 @@ optimizers:
         lr: 0.001
         weight_decay: 0.001
 
-num_epochs: 50
+num_epochs: 25
 periods:
   main_training:
     freeze: [ backbone ]
