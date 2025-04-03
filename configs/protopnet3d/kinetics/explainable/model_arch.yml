@@ -1,0 +1,33 @@
+top_arch:
+  module: cabrnet.archs.protopnet3d.model
+  name: ProtoPNet3D
+
+extractor:
+  backbone:
+    module: torch.hub
+    arch: r2plus1d_r50
+    layer: blocks.4.res_blocks.2.activation
+    repo_or_dir: facebookresearch/pytorchvideo
+    pretrained: True
+  add_on:
+    pool:
+      type: AvgPool3d
+      params:
+        kernel_size: [ 2,6,9 ]
+        stride: 1
+    dropout:
+      type: Dropout
+      params:
+        p: 0.5
+        inplace: False
+
+similarity:
+  name: ProtoPNet3DSimilarity
+
+classifier:
+  module: cabrnet.archs.protopnet3d.decision
+  name: ProtoPNet3DClassifier
+  params:
+    num_classes: 2
+    num_proto_per_class: 5
+    proto_init_mode: SHIFTED_NORMAL

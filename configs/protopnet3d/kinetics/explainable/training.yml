@@ -1,0 +1,35 @@
+param_groups:
+  backbone: extractor.convnet
+  prototypes: classifier.prototypes
+  last_layer: classifier.last_layer
+
+optimizers:
+  # Optimizer used during the first epochs
+  warmup_optimizer:
+    type: Adam 
+    groups:
+      prototypes:
+        lr: 0.0001
+      last_layer:
+        lr: 0.0001
+
+  # Main optimizer
+  joint_optimizer:
+    type: Adam
+    groups:
+      backbone:
+        lr: 0.000001
+        weight_decay: 0.001
+      prototypes:
+        lr: 0.00001
+        weight_decay: 0.001
+
+num_epochs: 30
+periods:
+  warmup:
+    num_epochs: 5
+    freeze: [ backbone ]
+    optimizers: warmup_optimizer
+  main_training:
+    freeze: [ last_layer ]
+    optimizers: joint_optimizer
