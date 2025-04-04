@@ -46,7 +46,7 @@ auxiliary_info:
     regularization: 0.001
     cross_entropy: 1.0
   projection_config:
-    start_epoch: 25
+    start_epoch: 17
     frequency: 5
     num_ft_epochs: 1
 
