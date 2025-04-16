@@ -24,3 +24,4 @@ website
 trained_models/
 result/
 *.gif
+/explain

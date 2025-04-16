@@ -113,12 +113,13 @@ class KineticsDataset(Dataset):
     def __init__(self,
                  path: str,
                  split: str,
-                 transform: str = "default",
-                 clip_length: int = 5,
-                 step_between_clips: int = 5,
-                 ratio: Fraction = Fraction(10, 7),
-                 height: int = 180
-                 ):
+                 subsampling: int,
+                 transform: str,
+                 clip_length: int,
+                 step_between_clips: int,
+                 ratio: Fraction,
+                 height: int
+    ):
         if transform == "default":
             transform = DefaultKineticsTransform(height, ratio)
         else:
@@ -126,28 +127,31 @@ class KineticsDataset(Dataset):
 
         logger.info(f"Loading Kinetics 400 split {split}...")
         k = Kinetics(path,
-                     frames_per_clip=clip_length,
+                     frames_per_clip= subsampling * clip_length,
                      step_between_clips=step_between_clips,
                      split=split,
                      output_format='TCHW',
                      transform=transform,
                      num_workers=4)
 
-        self.k = k
+        self.subsampling = subsampling
+        self.k = k # samples have shape CTHW
 
     def __len__(self):
         return len(self.k)
 
     def __getitem__(self, item):
-        return self.k[item][0], self.k[item][2]
+        sample = self.k[item][0][:,::self.subsampling,:,:] # slice syntax
+        return sample, self.k[item][2]
 
 def load_kinetics400 (
         path: str,
         split: str,
+        subsampling: int = 2,
         transform: str = "default",
         clip_length: int = 5,
         step_between_clips: int = 200,
         ratio: Fraction = Fraction(10, 7),
         height: int = 180
 ):
-    return KineticsDataset(path, split, transform, clip_length, step_between_clips, ratio, height)
+    return KineticsDataset(path, split, subsampling, transform, clip_length, step_between_clips, ratio, height)
