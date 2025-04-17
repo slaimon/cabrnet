@@ -1,5 +1,5 @@
 train_set:
-  module: cabrnet.core.utils.load_3d
+  module: cabrnet.core.utils.load3d
   name: load_kinetics400
   params:
     path: data/kinetics
@@ -8,7 +8,7 @@ train_set:
   shuffle: true
 
 projection_set:
-  module: cabrnet.core.utils.load_3d
+  module: cabrnet.core.utils.load3d
   name: load_kinetics400
   params:
     path: data/kinetics
@@ -17,7 +17,7 @@ projection_set:
   shuffle: false
 
 validation_set:
-  module: cabrnet.core.utils.load_3d
+  module: cabrnet.core.utils.load3d
   name: load_kinetics400
   params:
     path: data/kinetics
@@ -26,7 +26,7 @@ validation_set:
   shuffle: false
 
 test_set:
-  module: cabrnet.core.utils.load_3d
+  module: cabrnet.core.utils.load3d
   name: load_kinetics400
   params:
     path: data/kinetics

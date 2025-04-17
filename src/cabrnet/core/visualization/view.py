@@ -1,6 +1,7 @@
 import numpy as np
 from cv2 import COLORMAP_JET, applyColorMap
 from PIL import Image, ImageDraw
+from loguru import logger
 
 
 def compute_bbox(array: np.ndarray, threshold: float) -> tuple[int, int, int, int]:
@@ -71,7 +72,9 @@ def bbox_to_percentile(
     img_with_bbox = ImageDraw.Draw(im=dst_img)
     if x_max > x_min and y_max > y_min:
         # Handle the case when no bounding box is found
-        img_with_bbox.rectangle(xy=((x_min, y_min), (x_max, y_max)), width=thickness, outline="yellow")
+        img_with_bbox.rectangle(xy=((x_min, y_min), (x_max, y_max)), width=thickness, outline="red")
+    else:
+        logger.warning("!!! NO BOUNDING BOX FOUND !!!")
     return dst_img
 
 
