@@ -95,11 +95,11 @@ class SimilarityVisualizer3D(nn.Module):
         slices = []
         for idx in range(sim_map.shape[0]):
             # slice up both the scan and the similarity map
-            scan_slice = img_tensor[:, idx, :, :] # channel 0 (all channels should contain the same data)
+            scan_slice = img_tensor[:, idx, :, :]
             sim_slice = sim_map[idx, :, :]
 
             # convert the scan slice to an image
-            scan_slice = scan_slice.transpose(0,2)
+            scan_slice = scan_slice.transpose(0,2).transpose(0,1) # CHW -> HWC
             scan_slice = (scan_slice.numpy() * 255).astype(np.uint8)
             img = Image.fromarray(scan_slice)
 
