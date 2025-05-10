@@ -56,6 +56,7 @@ class ProtoPNet3DClassifier(CaBRNetClassifier):
         self._compatibility_mode = compatibility_mode
 
         # Init prototypes
+        # shape P x F x 1 x 1 x 1
         self.prototypes = nn.Parameter(  # type: ignore
             init_prototypes(
                 num_prototypes=num_proto_per_class * num_classes,

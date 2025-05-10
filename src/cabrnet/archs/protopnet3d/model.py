@@ -646,6 +646,7 @@ class ProtoPNet3D(CaBRNet):
             for proto_idx in range(num_prototypes)
         }
 
+        # P x D x 1 x 1 x 1
         projection_vectors = torch.zeros_like(self.classifier.prototypes)
 
         with torch.no_grad():
@@ -678,6 +679,7 @@ class ProtoPNet3D(CaBRNet):
                                 "h": h,
                                 "w": w,
                                 "dist": min_dist[img_idx, proto_idx].item(),
+                                "img_label":y.item(),
                             }
                             projection_vectors[proto_idx] = feats[img_idx, :, t, h, w].view(proto_dim, 1, 1, 1).cpu()
 
