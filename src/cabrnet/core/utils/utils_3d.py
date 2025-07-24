@@ -5,13 +5,13 @@ from PIL import Image
 
 # slice up the volume (C, T, H, W) in T different Images
 def frames_from_sample(sample:torch.Tensor) -> list[Image]:
-    t = sample.shape[1]
-
     if sample.dim() == 5:
         sample = sample.squeeze(dim=0)  # 1CTHW -> CTHW
     if sample.dim() == 4:
+        t = sample.shape[1]
         frames = [ sample[:, idx, :, :] for idx in range(t) ]  # CTHW -> CHW
     elif sample.dim() == 3:
+        t = sample.shape[0]
         frames = [ sample[idx, :,:] for idx in range(t) ]      # THW -> HW
     else:
         assert False, "sample should either be 3-dimensional (THW) or 4-dimensional (CTHW) or 5-dimensional (1CTHW)"
