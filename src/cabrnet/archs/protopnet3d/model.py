@@ -16,8 +16,11 @@ import time
 from cabrnet.archs.generic.decision import CaBRNetClassifier
 from cabrnet.archs.generic.model import CaBRNet
 from cabrnet.core.utils.optimizers import OptimizerManager
+from cabrnet.core.utils.utils_3d import convert_to_img
 from cabrnet.core.visualization.explainer import ExplanationGraph
 from cabrnet.core.visualization.visualizer import SimilarityVisualizer
+
+from cabrnet.core.utils.load_3d import load_video_sample, VideoClip
 
 
 class ProtoPNet3D(CaBRNet):
@@ -690,8 +693,7 @@ class ProtoPNet3D(CaBRNet):
 
     def explain(
         self,
-        img: str | Image.Image,
-        preprocess: Callable | None,
+        sample: VideoClip,
         visualizer: SimilarityVisualizer,
         prototype_dir: str = "",
         output_dir: str = "",
@@ -703,11 +705,10 @@ class ProtoPNet3D(CaBRNet):
         class_specific: bool = True,
         **kwargs,
     ) -> list[tuple[int, float, bool]]:
-        r"""Explains the decision for a particular image.
+        r"""Explains the decision for a particular video sample.
 
         Args:
-            img (str or Image): Path to image or image itself.
-            preprocess (Callable): Preprocessing function.
+            sample (VideoClip): Video clip.
             visualizer (SimilarityVisualizer): Similarity visualizer.
             prototype_dir (str, optional): Path to directory containing prototype visualizations. Default: "".
             output_dir (str, optional): Path to output directory. Default: "".
@@ -725,23 +726,18 @@ class ProtoPNet3D(CaBRNet):
         """
         self.eval()
 
-        if isinstance(img, str):
-            img = Image.open(img)
+        sample_tensor = sample.toTensor()
 
-        if preprocess is None:
-            preprocess = ToTensor()
-
-        img_tensor = preprocess(img)
-        if img_tensor.dim() != 5:
+        if sample_tensor.dim() != 5:
             # Fix number of dimensions if necessary (1,C,T,H,W)
-            img_tensor = torch.unsqueeze(img_tensor, dim=0)
+            sample_tensor = torch.unsqueeze(sample_tensor, dim=0)
 
         # Map to device
         self.to(device)
-        img_tensor = img_tensor.to(device)
+        sample_tensor = sample_tensor.to(device)
 
         # Perform inference and get minimum distance to each prototype
-        prediction, min_distances = self.forward(img_tensor)
+        prediction, min_distances = self.forward(sample_tensor)
         class_idx = torch.argmax(prediction, dim=1)[0]
         min_distances = min_distances[0]
 
@@ -756,8 +752,8 @@ class ProtoPNet3D(CaBRNet):
         img_path = os.path.join(output_dir, "original.png")
         if not disable_rendering:
             os.makedirs(os.path.join(output_dir, "test_patches"), exist_ok=exist_ok)
-            # Copy source image
-            img.save(img_path)
+            # Create a mosaic of the video clip in the destination folder as "original.png"
+            convert_to_img(sample_tensor).save(img_path)
         explanation = ExplanationGraph(output_dir=output_dir)
         explanation.set_test_image(img_path=img_path)
         most_relevant_prototypes = []  # Keep track of most relevant prototypes
@@ -776,7 +772,7 @@ class ProtoPNet3D(CaBRNet):
             # Generate test image patch
             patch_image_path = os.path.join(output_dir, "test_patches", f"proto_similarity_{proto_idx}.png")
             if not disable_rendering:
-                patch_image = visualizer.forward(img=img, img_tensor=img_tensor, proto_idx=proto_idx, device=device)
+                patch_image = visualizer.forward(img=sample, img_tensor=sample_tensor, proto_idx=proto_idx, device=device)
                 patch_image.save(patch_image_path)
             explanation.add_similarity(
                 prototype_img_path=prototype_image_path,
