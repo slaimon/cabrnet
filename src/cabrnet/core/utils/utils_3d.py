@@ -120,16 +120,21 @@ class UniformTemporalSubsample(torch.nn.Module):
 
 # Some debug functions...
 from cabrnet.core.utils.load_3d import load_video_sample
-def show_video(
-        path: str,
+
+def convert_to_img(
+        video: str | torch.Tensor,
         duration: int | Fraction = 1,
         num_frames: int = 9,
         ratio: int | Fraction = Fraction(10,7),
         height:int = 180
 ):
-    v = load_video_sample(path, 0, duration, num_frames, ratio, height)
+    if isinstance(video, str):
+        v = load_video_sample(video, 0, duration, num_frames, ratio, height)
+    else:
+        v = video
+
     f = frames_from_sample(v)
-    image_from_3d(f).show()
+    return image_from_3d(f)
 
 def save_gif(
         path: str,
