@@ -13,7 +13,7 @@ def frames_from_sample(sample:torch.Tensor) -> list[Image]:
     elif sample.dim() == 3:
         frames = [ sample[idx, :,:] for idx in range(t) ]      # THW -> HW
     else:
-        AssertionError("sample should either be 3-dimensional (THW) or 4-dimensional (CTHW)")
+        assert False, "sample should either be 3-dimensional (THW) or 4-dimensional (CTHW)"
 
     for i, frame in enumerate(frames):
         if sample.dim() == 4:
