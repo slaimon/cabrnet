@@ -136,7 +136,7 @@ def convert_to_img(
     f = frames_from_sample(v)
     return image_from_3d(f)
 
-def save_gif(
+def save_as_gif(
         path: str,
         output: str = "output.gif",
         duration: int | Fraction = 1,
