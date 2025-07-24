@@ -3,8 +3,6 @@ import numpy as np
 from fractions import Fraction
 from PIL import Image
 
-from cabrnet.core.utils.load_3d import load_video_sample
-
 # slice up the volume (C, T, H, W) in T different Images
 def frames_from_sample(sample:torch.Tensor) -> list[Image]:
     t = sample.shape[1]
@@ -69,33 +67,6 @@ def image_from_3d(slices:list[Image]):
 
     return get_concat_tile_resize(slices)
 
-# Some debug functions...
-
-def show_video(
-        path: str,
-        duration: int | Fraction = 1,
-        num_frames: int = 9,
-        ratio: int | Fraction = Fraction(10,7),
-        height:int = 180
-):
-    v = load_video_sample(path, 0, duration, num_frames, ratio, height)
-    f = frames_from_sample(v)
-    image_from_3d(f).show()
-
-def save_gif(
-        path: str,
-        output: str = "output.gif",
-        duration: int | Fraction = 1,
-        num_frames: int = 9,
-        ratio: int | Fraction = Fraction(10,7),
-        height:int = 180
-):
-    v = load_video_sample(path, 0, duration, num_frames, ratio, height)
-    f = frames_from_sample(v)
-    f[0].save(output, save_all=True, append_images=f[1:], optimize=False, duration=duration, loop=0)
-
-
-
 # copied from the pytorchvideo codebase because they're still using deprecated functions
 # and python won't import UniformTemporalSubsample
 def uniform_temporal_subsample(
@@ -145,3 +116,28 @@ class UniformTemporalSubsample(torch.nn.Module):
         return uniform_temporal_subsample(
             x, self._num_samples, self._temporal_dim
         )
+
+# Some debug functions...
+from cabrnet.core.utils.load_3d import load_video_sample
+def show_video(
+        path: str,
+        duration: int | Fraction = 1,
+        num_frames: int = 9,
+        ratio: int | Fraction = Fraction(10,7),
+        height:int = 180
+):
+    v = load_video_sample(path, 0, duration, num_frames, ratio, height)
+    f = frames_from_sample(v)
+    image_from_3d(f).show()
+
+def save_gif(
+        path: str,
+        output: str = "output.gif",
+        duration: int | Fraction = 1,
+        num_frames: int = 9,
+        ratio: int | Fraction = Fraction(10,7),
+        height:int = 180
+):
+    v = load_video_sample(path, 0, duration, num_frames, ratio, height)
+    f = frames_from_sample(v)
+    f[0].save(output, save_all=True, append_images=f[1:], optimize=False, duration=duration, loop=0)
