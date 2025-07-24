@@ -16,6 +16,8 @@ from cabrnet.core.utils.parser import load_config
 from cabrnet.core.visualization.upsampling import cubic_upsampling3D
 from cabrnet.core.visualization.view import supported_viewing_functions
 
+from cabrnet.core.utils.utils_3d import frames_from_sample, image_from_3d
+
 supported_attribution_functions = {
     "cubic_upsampling3D": cubic_upsampling3D
 }
@@ -91,61 +93,10 @@ class SimilarityVisualizer3D(nn.Module):
             img=img, img_tensor=img_tensor, proto_idx=proto_idx, device=device, location=location
         )
 
-        # slice up the volume (T, H, W) in T different pictures
-        slices = []
-        for idx in range(sim_map.shape[0]):
-            # slice up both the scan and the similarity map
-            scan_slice = img_tensor[:, idx, :, :]
-            sim_slice = sim_map[idx, :, :]
+        sample_frames = frames_from_sample(img_tensor)
+        slices = [ self.view(sample_frames[idx], sim_map[idx, :, :], **self.view_params) for idx in range(sim_map.shape[0]) ]
 
-            # convert the scan slice to an image
-            scan_slice = scan_slice.transpose(0,2).transpose(0,1) # CHW -> HWC
-            scan_slice = (scan_slice.numpy() * 255).astype(np.uint8)
-            img = Image.fromarray(scan_slice)
-
-            # visualize the attribution map on the image
-            slices.append(self.view(img, sim_slice, **self.view_params))
-
-        # arrange the pictures in a (roughly) square grid
-        def chunks(lst:list, n:int):
-            for i in range(0, len(lst), n):
-                yield lst[i:i + n]
-        height = int(np.ceil(np.sqrt(len(slices))))
-        slices = list(chunks(slices, height))
-
-        # produce a mosaic from the pictures.
-        # mosaic functions from:
-        # https://note.nkmk.me/en/python-pillow-concat-images/
-
-        def get_concat_h_multi_resize(im_list:list[PIL.Image.Image], resample=Image.Resampling.BICUBIC):
-            min_height = min(im.height for im in im_list)
-            im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
-                              for im in im_list]
-            total_width = sum(im.width for im in im_list_resize)
-            dst = Image.new('RGB', (total_width, min_height))
-            pos_x = 0
-            for im in im_list_resize:
-                dst.paste(im, (pos_x, 0))
-                pos_x += im.width
-            return dst
-
-        def get_concat_v_multi_resize(im_list:list[PIL.Image.Image], resample=Image.Resampling.BICUBIC):
-            min_width = min(im.width for im in im_list)
-            im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=resample)
-                              for im in im_list]
-            total_height = sum(im.height for im in im_list_resize)
-            dst = Image.new('RGB', (min_width, total_height))
-            pos_y = 0
-            for im in im_list_resize:
-                dst.paste(im, (0, pos_y))
-                pos_y += im.height
-            return dst
-
-        def get_concat_tile_resize(im_list_2d:list[list[PIL.Image.Image]], resample=Image.Resampling.BICUBIC):
-            im_list_v = [get_concat_h_multi_resize(im_list_h, resample=resample) for im_list_h in im_list_2d]
-            return get_concat_v_multi_resize(im_list_v, resample=resample)
-
-        return get_concat_tile_resize(slices)
+        return image_from_3d(slices)
 
     def get_attribution(
             self,
