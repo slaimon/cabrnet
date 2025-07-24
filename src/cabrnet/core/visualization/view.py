@@ -71,10 +71,10 @@ def bbox_to_percentile(
     # Draw bounding box
     img_with_bbox = ImageDraw.Draw(im=dst_img)
     if x_max > x_min and y_max > y_min:
-        # Handle the case when no bounding box is found
-        img_with_bbox.rectangle(xy=((x_min, y_min), (x_max, y_max)), width=thickness, outline="red")
+        img_with_bbox.rectangle(xy=((x_min, y_min), (x_max, y_max)), width=thickness, outline="yellow")
     else:
-        logger.warning("!!! NO BOUNDING BOX FOUND !!!")
+        # Handle the case when no bounding box is found
+        logger.warning("No bounding box found - maybe the extractor output is too small?")
     return dst_img
 
 
