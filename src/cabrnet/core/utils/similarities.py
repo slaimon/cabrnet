@@ -282,6 +282,9 @@ class ProtoPNetSimilarity(SquaredEuclideanDistance, LogDistance):
 class SquaredEuclideanDistance3D(SimilarityLayer):
     r"""Layer for computing Euclidean (L2) distances in the convolutional space."""
 
+    def distances_to_similarities(self, distances: Tensor, **kwargs) -> Tensor:
+        return torch.log((distances + 1)/(distances + 1e-4))
+
     def distances(self, features: Tensor, prototypes: Tensor, **kwargs) -> Tensor:
         r"""Computes pairwise squared Euclidean (L2) distances between a tensor of features and a tensor of prototypes.
 
