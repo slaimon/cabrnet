@@ -1,0 +1,10 @@
+attribution:
+  type: cubic_upsampling3D
+  params:
+    normalize: True
+    location: max
+view:
+  type: heatmap
+  params:
+    overlay: True
+    percentile: 0.5
