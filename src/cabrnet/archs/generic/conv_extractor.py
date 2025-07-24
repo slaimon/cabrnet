@@ -217,7 +217,7 @@ class ConvExtractor(nn.Module):
                 raise ValueError(f"Module {val['type']} not found in torch.nn")
             params = val.get("params")
             if params is not None:
-                if val["type"] == "Conv2d":
+                if val["type"] == "Conv2d" or val["type"] == "Conv3d":
                     # Check or update in_channels
                     if params.get("in_channels") is None:
                         params["in_channels"] = in_channels
