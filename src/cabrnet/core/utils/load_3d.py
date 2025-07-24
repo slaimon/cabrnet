@@ -8,6 +8,7 @@ from loguru import logger
 from fractions import Fraction
 from typing import Callable
 
+from pyarrow import duration
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
 
@@ -164,6 +165,24 @@ def load_kinetics400 (
 from pytorchvideo.data.encoded_video_pyav import EncodedVideo
 from torchvision.transforms import Compose, Lambda
 from cabrnet.core.utils.utils_3d import UniformTemporalSubsample
+
+class VideoClip:
+    def __init__(self,
+             path: str,
+             start_sec: int | Fraction = 0,
+             duration_sec: int | Fraction = 1,
+             num_frames: int = 5,
+             ratio: int | Fraction = Fraction(10,7),
+             height: int = 180
+    ):
+        self.clip = load_video_sample(path, start_sec, duration_sec, num_frames, ratio, height)
+        self.duration = duration_sec
+        self.frames = num_frames
+        self.height = height
+        self.width = int(ratio*height)
+
+    def toTensor(self):
+        return self.clip
 
 def load_video_sample(
         path: str,
