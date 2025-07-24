@@ -30,6 +30,7 @@ def image_from_3d(slices:list[Image]):
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
 
+    assert len(slices) > 0, "The image is empty"
     height = int(np.ceil(np.sqrt(len(slices))))
     slices = list(chunks(slices, height))
 
