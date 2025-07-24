@@ -1,5 +1,9 @@
 import torch
 import random
+
+from PIL import Image
+import numpy as np
+
 from loguru import logger
 from fractions import Fraction
 from typing import Callable
@@ -155,3 +159,33 @@ def load_kinetics400 (
         height: int = 180
 ):
     return KineticsDataset(path, split, subsampling, transform, clip_length, step_between_clips, ratio, height)
+
+
+from pytorchvideo.data.encoded_video_pyav import EncodedVideo
+from torchvision.transforms import Compose, Lambda
+from cabrnet.core.utils.utils_3d import UniformTemporalSubsample
+
+def load_video_sample(
+        path: str,
+        start_sec: int | Fraction = 0,
+        duration_sec: int | Fraction = 1,
+        num_frames: int = 5,
+        ratio: Fraction = Fraction(10, 7),
+        height: int = 180
+):
+    video = EncodedVideo.from_path(path)
+
+    h = height
+    w = int(ratio * h)
+    resize = Transforms.Resize((h, w), interpolation=Transforms.InterpolationMode.NEAREST)
+
+    start_sec = Fraction(start_sec)
+    end_sec = Fraction(start_sec + duration_sec)
+    video_data = video.get_clip(start_sec, end_sec)["video"] # C,T,H,W
+    transform = Compose([
+        UniformTemporalSubsample(num_frames),
+        Lambda(lambda x: x/255.0),
+        Lambda(lambda x: torch.stack([resize(frame) for frame in [x[:,i,:,:] for i in range(x.shape[1])]], dim=1))
+    ])
+
+    return transform(video_data)
