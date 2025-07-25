@@ -189,7 +189,7 @@ class KineticsDataset(Dataset):
                      split=split,
                      output_format='TCHW',
                      transform=transform,
-                     num_workers=4)
+                     num_workers=6)
 
         self.subsampling = subsampling
         self.k = k # samples have shape CTHW
