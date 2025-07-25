@@ -16,7 +16,7 @@ import time
 from cabrnet.archs.generic.decision import CaBRNetClassifier
 from cabrnet.archs.generic.model import CaBRNet
 from cabrnet.core.utils.optimizers import OptimizerManager
-from cabrnet.core.utils.utils_3d import convert_to_img
+from cabrnet.core.utils.view_3d import convert_to_img
 from cabrnet.core.visualization.explainer import ExplanationGraph
 from cabrnet.core.visualization.visualizer import SimilarityVisualizer
 
