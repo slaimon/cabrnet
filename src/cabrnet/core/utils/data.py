@@ -107,7 +107,7 @@ class DatasetManager:
 
     @staticmethod
     def get_datasets(
-        config: str | dict[str, Any], sampling_ratio: int = 1, load_segmentation: bool = False
+        config: str | dict[str, Any], sampling_ratio: int = 1, load_segmentation: bool = False, set_names: list[str] = None
     ) -> dict[str, dict[str, Dataset | int | bool]]:
         r"""Loads datasets from a configuration file.
 
@@ -115,6 +115,7 @@ class DatasetManager:
             config (str, dict): Path to configuration file, or configuration dictionary.
             sampling_ratio (int, optional): Sampling ratio (e.g. 5 means only one image in five is used). Default: 1.
             load_segmentation (bool, optional): If True, loads segmentation datasets if available. Default: False.
+            set_names (list[str], optional): Only load the specified splits. Default: None (load everything)
 
         Returns:
             Dictionary of datasets with their respective batch size and shuffle property.
@@ -136,7 +137,9 @@ class DatasetManager:
             if dataset_name not in config:
                 logger.error(f"Missing configuration for {dataset_name}.")
 
-        for dataset_name in config:
+        set_names = set_names if set_names is not None else config
+
+        for dataset_name in set_names:
             dataset: dict[str, Dataset | int | bool] = {}
             logger.info(f"Loading dataset {dataset_name}")
             dconfig = config[dataset_name]
@@ -194,7 +197,7 @@ class DatasetManager:
 
     @staticmethod
     def get_dataloaders(
-        config: str | dict[str, Any], sampling_ratio: int = 1, load_segmentation: bool = False
+        config: str | dict[str, Any], sampling_ratio: int = 1, load_segmentation: bool = False, set_names: list[str] = None
     ) -> dict[str, DataLoader]:
         r"""Creates dataloaders from a configuration file.
 
@@ -202,6 +205,7 @@ class DatasetManager:
             config (str, dict): Path to configuration file, or configuration dictionary.
             sampling_ratio (int, optional): Sampling ratio (e.g. 5 means only one image in five is used). Default: 1.
             load_segmentation (bool, optional): If True, loads segmentation datasets if available. Default: False.
+            set_names (list[str], optional): Only load the specified splits. Default: None (load everything)
 
         Returns:
             Dictionary of dataloaders.
@@ -210,7 +214,7 @@ class DatasetManager:
             ValueError whenever a dataset could not be loaded or a parameter is invalid.
         """
         datasets = DatasetManager.get_datasets(
-            config=config, sampling_ratio=sampling_ratio, load_segmentation=load_segmentation
+            config=config, sampling_ratio=sampling_ratio, load_segmentation=load_segmentation, set_names=set_names
         )
         dataloaders: dict[str, DataLoader] = {}
 

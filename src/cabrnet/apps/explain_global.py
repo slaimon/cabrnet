@@ -114,7 +114,8 @@ def execute(args: Namespace) -> None:
     visualizer = SimilarityVisualizer3D.build_from_config(config=args.visualization, model=model)
 
     # Build prototypes
-    dataloaders = DatasetManager.get_dataloaders(config=args.dataset)
+    set_names = ["projection_set"]
+    dataloaders = DatasetManager.get_dataloaders(config=args.dataset, set_names=set_names)
     projection_info = load_projection_info(args.projection_info)
     model.extract_prototypes(
         dataloader_raw=dataloaders["projection_set_raw"],
