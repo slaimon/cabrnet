@@ -35,38 +35,44 @@ def image_from_3d(slices:list[Image]):
     slices = list(chunks(slices, height))
 
     # produce a mosaic from the pictures.
-    # mosaic functions from:
+    # mosaic functions adapted from:
     # https://note.nkmk.me/en/python-pillow-concat-images/
+    #
+    # The main difference here is we assume all images have same size
 
-    def get_concat_h_multi_resize(im_list: list[Image], resample=Image.Resampling.BICUBIC):
-        min_height = min(im.height for im in im_list)
-        im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
-                          for im in im_list]
-        total_width = sum(im.width for im in im_list_resize)
-        dst = Image.new('RGB', (total_width, min_height))
-        pos_x = 0
-        for im in im_list_resize:
+    def concat_imgs(im_list: list[Image], spacing:int, bgcolor:tuple[int,int,int]):
+        width, height = im_list[0].width, im_list[0].height
+        total_width = width * len(im_list) + spacing * (len(im_list)+1)
+        dst = Image.new('RGB', (total_width, height))
+        dst.paste(bgcolor, (0,0,dst.size[0],dst.size[1]))
+        pos_x = spacing
+        for im in im_list:
             dst.paste(im, (pos_x, 0))
-            pos_x += im.width
+            pos_x += im.width + spacing
         return dst
 
-    def get_concat_v_multi_resize(im_list: list[Image], resample=Image.Resampling.BICUBIC):
-        min_width = min(im.width for im in im_list)
-        im_list_resize = [im.resize((min_width, int(im.height * min_width / im.width)), resample=resample)
-                          for im in im_list]
-        total_height = sum(im.height for im in im_list_resize)
-        dst = Image.new('RGB', (min_width, total_height))
-        pos_y = 0
-        for im in im_list_resize:
+    def concat_rows(im_list: list[Image], spacing:int, bgcolor:tuple[int,int,int]):
+        width, height = im_list[0].width, im_list[0].height
+        total_height = height * len(im_list) + spacing * (len(im_list)+1)
+        dst = Image.new('RGB', (width, total_height))
+        dst.paste(bgcolor, (0,0,dst.size[0],dst.size[1]))
+        pos_y = spacing
+        for im in im_list:
             dst.paste(im, (0, pos_y))
-            pos_y += im.height
+            pos_y += im.height + spacing
         return dst
 
-    def get_concat_tile_resize(im_list_2d: list[list[Image]], resample=Image.Resampling.BICUBIC):
-        im_list_v = [get_concat_h_multi_resize(im_list_h, resample=resample) for im_list_h in im_list_2d]
-        return get_concat_v_multi_resize(im_list_v, resample=resample)
+    def make_mosaic(
+            im_list_2d: list[list[Image]],
+            spacing:float = 0.01,
+            bgcolor:tuple[int,int,int] = (255,255,255)
+        ):
+        im = im_list_2d[0][0]
+        spacing = int(spacing * max(im.width,im.height))
+        im_list_v = [concat_imgs(im_list_h, spacing, bgcolor) for im_list_h in im_list_2d]
+        return concat_rows(im_list_v, spacing, bgcolor)
 
-    return get_concat_tile_resize(slices)
+    return make_mosaic(slices)
 
 # copied from the pytorchvideo codebase because they're still using deprecated functions
 # and python won't import UniformTemporalSubsample

@@ -184,22 +184,20 @@ class KineticsDataset(Dataset):
 
         logger.info(f"Loading Kinetics 400 split {split}...")
         k = Kinetics(path,
-                     frames_per_clip= subsampling * clip_length,
+                     frames_per_clip=clip_length,
                      step_between_clips=step_between_clips,
                      split=split,
                      output_format='TCHW',
-                     transform=transform,
-                     num_workers=6)
-
-        self.subsampling = subsampling
-        self.k = k # samples have shape CTHW
+                     transform=transform, # TCHW -> CTHW
+                     num_workers=6,
+                     frame_rate=int(30/subsampling))
+        self.dataset = k
 
     def __len__(self):
-        return len(self.k)
+        return len(self.dataset)
 
     def __getitem__(self, item):
-        sample = self.k[item][0][:,::self.subsampling,:,:] # slice syntax
-        return sample, self.k[item][2]
+        return self.dataset[item]
 
 def load_kinetics400 (
         path: str,
