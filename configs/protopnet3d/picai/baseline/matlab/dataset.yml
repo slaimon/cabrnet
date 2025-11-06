@@ -1,0 +1,39 @@
+train_set:
+  module: cabrnet.core.utils.load_numpy
+  name: load_torch_dataset
+  params:
+    path: data/prostate/train
+    augment: true
+    RGB: false
+  batch_size: 8
+  shuffle: true
+
+projection_set:
+  module: cabrnet.core.utils.load_numpy
+  name: load_torch_dataset
+  params:
+    path: data/prostate/train
+    augment: false
+    RGB: false
+  batch_size: 8
+  shuffle: false
+
+validation_set:
+  module: cabrnet.core.utils.load_numpy
+  name: load_torch_dataset
+  params:
+    path: data/prostate/valid
+    augment: false
+    RGB: false
+  batch_size: 8
+  shuffle: false
+
+test_set:
+  module: cabrnet.core.utils.load_numpy
+  name: load_torch_dataset
+  params:
+    path: data/prostate/test
+    augment: false
+    RGB: false
+  batch_size: 8
+  shuffle: false
